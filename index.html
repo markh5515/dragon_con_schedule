@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dragon Con 2024 - Editable Schedule</title>
+    <title>Dragon Con 2024 - Group Schedule Planner</title>
     <style>
         @media print {
             body { margin: 0.5in; }
@@ -12,11 +12,12 @@
             h2 { page-break-after: avoid; }
             .delete-btn { display: none !important; }
             .instructions { display: none !important; }
+            .attendee-manager { display: none !important; }
         }
         
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             padding: 20px;
             background: #f5f5f5;
@@ -39,6 +40,91 @@
             border-radius: 8px;
             box-shadow: 0 3px 10px rgba(0,0,0,0.2);
         }
+        
+        .attendee-manager {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .attendee-manager h3 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        
+        .attendee-list {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+        
+        .attendee-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            color: white;
+            position: relative;
+        }
+        
+        .attendee-chip .remove {
+            cursor: pointer;
+            margin-left: 5px;
+            opacity: 0.8;
+        }
+        
+        .attendee-chip .remove:hover {
+            opacity: 1;
+        }
+        
+        .add-attendee-form {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .add-attendee-form input {
+            padding: 8px 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        
+        .add-attendee-form select {
+            padding: 8px 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        
+        .add-attendee-form button {
+            padding: 8px 16px;
+            background: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .add-attendee-form button:hover {
+            background: #229954;
+        }
+        
+        /* Attendee colors */
+        .attendee-1 { background: #e74c3c; }
+        .attendee-2 { background: #3498db; }
+        .attendee-3 { background: #27ae60; }
+        .attendee-4 { background: #f39c12; }
+        .attendee-5 { background: #9b59b6; }
+        .attendee-6 { background: #1abc9c; }
+        .attendee-7 { background: #34495e; }
+        .attendee-8 { background: #e67e22; }
         
         .instructions {
             background: #d4edda;
@@ -92,14 +178,20 @@
         }
         
         .event {
-            padding: 8px 12px;
-            margin: 5px 0;
+            padding: 12px;
+            margin: 8px 0;
             border-radius: 5px;
             border-left: 4px solid;
             background: #fafafa;
             position: relative;
             cursor: text;
             transition: all 0.3s ease;
+        }
+        
+        .event-title {
+            font-weight: 500;
+            margin-bottom: 8px;
+            padding-right: 60px;
         }
         
         .event[contenteditable="true"]:hover {
@@ -113,26 +205,37 @@
             background: white;
         }
         
-        .event.priority-high {
-            border-width: 8px;
+        .attendee-badges {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+            min-height: 30px;
+        }
+        
+        .attendee-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            color: white;
             font-weight: bold;
-        }
-        
-        .event.priority-maybe {
-            opacity: 0.7;
-            font-style: italic;
-        }
-        
-        .event.priority-skip {
+            cursor: pointer;
             opacity: 0.3;
-            text-decoration: line-through;
+            transition: opacity 0.2s;
+        }
+        
+        .attendee-badge.active {
+            opacity: 1;
+        }
+        
+        .attendee-badge:hover {
+            opacity: 0.8;
         }
         
         .delete-btn {
             position: absolute;
             right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
+            top: 12px;
             background: #e74c3c;
             color: white;
             border: none;
@@ -150,45 +253,6 @@
         
         .delete-btn:hover {
             background: #c0392b;
-        }
-        
-        .priority-buttons {
-            position: absolute;
-            left: -120px;
-            top: 50%;
-            transform: translateY(-50%);
-            display: none;
-            gap: 5px;
-        }
-        
-        .event:hover .priority-buttons {
-            display: flex;
-        }
-        
-        .priority-btn {
-            padding: 4px 8px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 11px;
-            color: white;
-            transition: all 0.2s;
-        }
-        
-        .priority-btn.high {
-            background: #27ae60;
-        }
-        
-        .priority-btn.maybe {
-            background: #f39c12;
-        }
-        
-        .priority-btn.skip {
-            background: #7f8c8d;
-        }
-        
-        .priority-btn:hover {
-            transform: scale(1.1);
         }
         
         /* Color coding for different event types */
@@ -318,33 +382,66 @@
         .add-event-btn:hover {
             background: #229954;
         }
+        
+        .conflict-summary {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 10px;
+            display: none;
+        }
+        
+        .conflict-summary.show {
+            display: block;
+        }
+        
+        .conflict-summary h4 {
+            margin-top: 0;
+            color: #856404;
+        }
     </style>
 </head>
 <body>
-    <h1>🐉 Dragon Con 2024 - Interactive Schedule Editor 🐉</h1>
+    <h1>🐉 Dragon Con 2024 - Group Schedule Planner 🐉</h1>
+    
+    <div class="attendee-manager no-print">
+        <h3>👥 Group Members</h3>
+        <div class="attendee-list" id="attendeeList">
+            <!-- Attendees will be added here -->
+        </div>
+        <div class="add-attendee-form">
+            <input type="text" id="attendeeName" placeholder="Enter name" maxlength="20">
+            <select id="attendeeColor">
+                <option value="1">Red</option>
+                <option value="2">Blue</option>
+                <option value="3">Green</option>
+                <option value="4">Orange</option>
+                <option value="5">Purple</option>
+                <option value="6">Teal</option>
+                <option value="7">Gray</option>
+                <option value="8">Brown</option>
+            </select>
+            <button onclick="addAttendee()">+ Add Person</button>
+        </div>
+    </div>
     
     <div class="instructions no-print">
-        <h3>📝 How to Edit Your Schedule:</h3>
+        <h3>📝 How to Use the Group Planner:</h3>
         <ul>
-            <li><strong>Edit Events:</strong> Click on any event text to edit it directly</li>
-            <li><strong>Delete Events:</strong> Hover over an event and click the red "Delete" button to remove events you're not attending</li>
-            <li><strong>Set Priority:</strong> Hover over an event to see priority buttons:
-                <ul>
-                    <li>🟢 <strong>HIGH</strong> - Must attend (thick border)</li>
-                    <li>🟡 <strong>MAYBE</strong> - If time permits (faded)</li>
-                    <li>⚫ <strong>SKIP</strong> - Not attending (crossed out)</li>
-                </ul>
-            </li>
-            <li><strong>Add Notes:</strong> Simply type additional notes directly into any event</li>
-            <li><strong>Add New Events:</strong> Click "Add Event" button under any time slot</li>
-            <li><strong>Save Your Work:</strong> Use the toolbar buttons to print or save your customized schedule</li>
+            <li><strong>Add Group Members:</strong> Enter names and pick colors for each person in your group above</li>
+            <li><strong>Assign Attendees:</strong> Click on attendee badges under each event to toggle who's interested</li>
+            <li><strong>See Conflicts:</strong> When multiple people want different events at the same time, you'll see a conflict summary</li>
+            <li><strong>Edit Events:</strong> Click on event titles to add notes like room numbers or meeting spots</li>
+            <li><strong>Delete Events:</strong> Remove events no one is interested in with the red "Delete" button</li>
+            <li><strong>Split the Party:</strong> Use the attendee badges to coordinate who goes where during overlaps</li>
         </ul>
     </div>
     
     <div class="toolbar no-print">
         <button onclick="window.print()">🖨️ Print Schedule</button>
         <button onclick="saveSchedule()">💾 Save Changes</button>
-        <button onclick="clearAllSkipped()">🗑️ Remove Skipped</button>
+        <button onclick="showConflicts()">⚠️ Show All Conflicts</button>
         <button onclick="resetSchedule()">🔄 Reset Original</button>
     </div>
     
@@ -394,806 +491,478 @@
         </div>
     </div>
     
-    <div class="day-section">
-        <h2>📅 Thursday, August 28</h2>
-        <div class="time-slot">
-            <div class="time-header">8:30 PM</div>
-            <div class="event cosplay" contenteditable="true">Page to Stage Cosplay and Costume Contest
-                <div class="priority-buttons">
-                    <button class="priority-btn high" onclick="setPriority(this.parentElement.parentElement, 'high')">HIGH</button>
-                    <button class="priority-btn maybe" onclick="setPriority(this.parentElement.parentElement, 'maybe')">MAYBE</button>
-                    <button class="priority-btn skip" onclick="setPriority(this.parentElement.parentElement, 'skip')">SKIP</button>
-                </div>
-                <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
-            </div>
-            <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
-        </div>
+    <div class="schedule-container" id="scheduleContainer">
+        <!-- Schedule will be generated here -->
     </div>
     
-    <div class="day-section">
-        <h2>📅 Friday, August 29</h2>
-        <div class="time-slot">
-            <div class="time-header">1:00 PM</div>
-            <div class="event science-tech" contenteditable="true">Building Your Own JARVIS: AI across Any Device
-                <div class="priority-buttons">
-                    <button class="priority-btn high" onclick="setPriority(this.parentElement.parentElement, 'high')">HIGH</button>
-                    <button class="priority-btn maybe" onclick="setPriority(this.parentElement.parentElement, 'maybe')">MAYBE</button>
-                    <button class="priority-btn skip" onclick="setPriority(this.parentElement.parentElement, 'skip')">SKIP</button>
-                </div>
-                <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
-            </div>
-            <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
-        </div>
-        
-        <div class="time-slot">
-            <div class="time-header">2:30 PM <span class="overlap-warning">⚠️ 2 OVERLAPPING</span></div>
-            <div class="event apocalypse" contenteditable="true">Apocalypse POV: How It Happened
-                <div class="priority-buttons">
-                    <button class="priority-btn high" onclick="setPriority(this.parentElement.parentElement, 'high')">HIGH</button>
-                    <button class="priority-btn maybe" onclick="setPriority(this.parentElement.parentElement, 'maybe')">MAYBE</button>
-                    <button class="priority-btn skip" onclick="setPriority(this.parentElement.parentElement, 'skip')">SKIP</button>
-                </div>
-                <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
-            </div>
-            <div class="event writing" contenteditable="true">Military Sci-Fi Writers & Creators - Media Edition
-                <div class="priority-buttons">
-                    <button class="priority-btn high" onclick="setPriority(this.parentElement.parentElement, 'high')">HIGH</button>
-                    <button class="priority-btn maybe" onclick="setPriority(this.parentElement.parentElement, 'maybe')">MAYBE</button>
-                    <button class="priority-btn skip" onclick="setPriority(this.parentElement.parentElement, 'skip')">SKIP</button>
-                </div>
-                <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
-            </div>
-            <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
-        </div>
-        
-        <div class="time-slot">
-            <div class="time-header">3:00 PM</div>
-            <div class="event litrpg" contenteditable="true">Dungeon Crawler Carl
-                <div class="priority-buttons">
-                    <button class="priority-btn high" onclick="setPriority(this.parentElement.parentElement, 'high')">HIGH</button>
-                    <button class="priority-btn maybe" onclick="setPriority(this.parentElement.parentElement, 'maybe')">MAYBE</button>
-                    <button class="priority-btn skip" onclick="setPriority(this.parentElement.parentElement, 'skip')">SKIP</button>
-                </div>
-                <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
-            </div>
-            <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
-        </div>
-        
-        <div class="time-slot">
-            <div class="time-header">4:00 PM <span class="overlap-warning">⚠️ 3 OVERLAPPING</span></div>
-            <div class="event writing" contenteditable="true">Romance + Fantasy = Romantasy: Decoding It All
-                <div class="priority-buttons">
-                    <button class="priority-btn high" onclick="setPriority(this.parentElement.parentElement, 'high')">HIGH</button>
-                    <button class="priority-btn maybe" onclick="setPriority(this.parentElement.parentElement, 'maybe')">MAYBE</button>
-                    <button class="priority-btn skip" onclick="setPriority(this.parentElement.parentElement, 'skip')">SKIP</button>
-                </div>
-                <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
-            </div>
-            <div class="event writing" contenteditable="true">Shall We Write a Story? Collaborative Short-Story Creation
-                <div class="priority-buttons">
-                    <button class="priority-btn high" onclick="setPriority(this.parentElement.parentElement, 'high')">HIGH</button>
-                    <button class="priority-btn maybe" onclick="setPriority(this.parentElement.parentElement, 'maybe')">MAYBE</button>
-                    <button class="priority-btn skip" onclick="setPriority(this.parentElement.parentElement, 'skip')">SKIP</button>
-                </div>
-                <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
-            </div>
-            <div class="event writing" contenteditable="true">Writing for Geeks | Creating Engaging Content for Geeks, Gamers, and Fans
-                <div class="priority-buttons">
-                    <button class="priority-btn high" onclick="setPriority(this.parentElement.parentElement, 'high')">HIGH</button>
-                    <button class="priority-btn maybe" onclick="setPriority(this.parentElement.parentElement, 'maybe')">MAYBE</button>
-                    <button class="priority-btn skip" onclick="setPriority(this.parentElement.parentElement, 'skip')">SKIP</button>
-                </div>
-                <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
-            </div>
-            <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
-        </div>
-        
-        <div class="time-slot">
-            <div class="time-header">5:30 PM <span class="overlap-warning">⚠️ 3 OVERLAPPING</span></div>
-            <div class="event tv-show" contenteditable="true">Fallout (TV Show): Fan Discussion Panel
-                <div class="priority-buttons">
-                    <button class="priority-btn high" onclick="setPriority(this.parentElement.parentElement, 'high')">HIGH</button>
-                    <button class="priority-btn maybe" onclick="setPriority(this.parentElement.parentElement, 'maybe')">MAYBE</button>
-                    <button class="priority-btn skip" onclick="setPriority(this.parentElement.parentElement, 'skip')">SKIP</button>
-                </div>
-                <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
-            </div>
-            <div class="event tv-show" contenteditable="true">Psych: The Powers of Observation and Deduction
-                <div class="priority-buttons">
-                    <button class="priority-btn high" onclick="setPriority(this.parentElement.parentElement, 'high')">HIGH</button>
-                    <button class="priority-btn maybe" onclick="setPriority(this.parentElement.parentElement, 'maybe')">MAYBE</button>
-                    <button class="priority-btn skip" onclick="setPriority(this.parentElement.parentElement, 'skip')">SKIP</button>
-                </div>
-                <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
-            </div>
-            <div class="event cosplay" contenteditable="true">Video Game Costume Contest
-                <div class="priority-buttons">
-                    <button class="priority-btn high" onclick="setPriority(this.parentElement.parentElement, 'high')">HIGH</button>
-                    <button class="priority-btn maybe" onclick="setPriority(this.parentElement.parentElement, 'maybe')">MAYBE</button>
-                    <button class="priority-btn skip" onclick="setPriority(this.parentElement.parentElement, 'skip')">SKIP</button>
-                </div>
-                <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
-            </div>
-            <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
-        </div>
-        
-        <div class="time-slot">
-            <div class="time-header">6:00 PM</div>
-            <div class="event gaming" contenteditable="true">American Revolution Crisis, (NSDM) MegaGame
-                <div class="priority-buttons">
-                    <button class="priority-btn high" onclick="setPriority(this.parentElement.parentElement, 'high')">HIGH</button>
-                    <button class="priority-btn maybe" onclick="setPriority(this.parentElement.parentElement, 'maybe')">MAYBE</button>
-                    <button class="priority-btn skip" onclick="setPriority(this.parentElement.parentElement, 'skip')">SKIP</button>
-                </div>
-                <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
-            </div>
-            <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
-        </div>
-        
-        <div class="time-slot">
-            <div class="time-header">7:00 PM</div>
-            <div class="event litrpg" contenteditable="true">Improvised Dungeons & Dragons - LIVE!
-                <div class="priority-buttons">
-                    <button class="priority-btn high" onclick="setPriority(this.parentElement.parentElement, 'high')">HIGH</button>
-                    <button class="priority-btn maybe" onclick="setPriority(this.parentElement.parentElement, 'maybe')">MAYBE</button>
-                    <button class="priority-btn skip" onclick="setPriority(this.parentElement.parentElement, 'skip')">SKIP</button>
-                </div>
-                <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
-            </div>
-            <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
-        </div>
-        
-        <div class="time-slot">
-            <div class="time-header">8:00 PM</div>
-            <div class="event writing" contenteditable="true">The Gather: Welcome to Literature
-                <div class="priority-buttons">
-                    <button class="priority-btn high" onclick="setPriority(this.parentElement.parentElement, 'high')">HIGH</button>
-                    <button class="priority-btn maybe" onclick="setPriority(this.parentElement.parentElement, 'maybe')">MAYBE</button>
-                    <button class="priority-btn skip" onclick="setPriority(this.parentElement.parentElement, 'skip')">SKIP</button>
-                </div>
-                <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
-            </div>
-            <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
-        </div>
-        
-        <div class="time-slot">
-            <div class="time-header">8:30 PM <span class="overlap-warning">⚠️ 6 OVERLAPPING</span></div>
-            <div class="event science-tech" contenteditable="true">AI-Assisted Programming for Cosplay Electronics
-                <div class="priority-buttons">
-                    <button class="priority-btn high" onclick="setPriority(this.parentElement.parentElement, 'high')">HIGH</button>
-                    <button class="priority-btn maybe" onclick="setPriority(this.parentElement.parentElement, 'maybe')">MAYBE</button>
-                    <button class="priority-btn skip" onclick="setPriority(this.parentElement.parentElement, 'skip')">SKIP</button>
-                </div>
-                <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
-            </div>
-            <div class="event party-show" contenteditable="true">Blankety-Blank: The Game Show
-                <div class="priority-buttons">
-                    <button class="priority-btn high" onclick="setPriority(this.parentElement.parentElement, 'high')">HIGH</button>
-                    <button class="priority-btn maybe" onclick="setPriority(this.parentElement.parentElement, 'maybe')">MAYBE</button>
-                    <button class="priority-btn skip" onclick="setPriority(this.parentElement.parentElement, 'skip')">SKIP</button>
-                </div>
-                <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
-            </div>
-            <div class="event writing" contenteditable="true">Campfire Story Contest
-                <div class="priority-buttons">
-                    <button class="priority-btn high" onclick="setPriority(this.parentElement.parentElement, 'high')">HIGH</button>
-                    <button class="priority-btn maybe" onclick="setPriority(this.parentElement.parentElement, 'maybe')">MAYBE</button>
-                    <button class="priority-btn skip" onclick="setPriority(this.parentElement.parentElement, 'skip')">SKIP</button>
-                </div>
-                <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
-            </div>
-            <div class="event cosplay" contenteditable="true">Friday Night Costuming Contest
-                <div class="priority-buttons">
-                    <button class="priority-btn high" onclick="setPriority(this.parentElement.parentElement, 'high')">HIGH</button>
-                    <button class="priority-btn maybe" onclick="setPriority(this.parentElement.parentElement, 'maybe')">MAYBE</button>
-                    <button class="priority-btn skip" onclick="setPriority(this.parentElement.parentElement, 'skip')">SKIP</button>
-                </div>
-                <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
-            </div>
-            <div class="event writing" contenteditable="true">Military Science Fiction and Space Opera
-                <div class="priority-buttons">
-                    <button class="priority-btn high" onclick="setPriority(this.parentElement.parentElement, 'high')">HIGH</button>
-                    <button class="priority-btn maybe" onclick="setPriority(this.parentElement.parentElement, 'maybe')">MAYBE</button>
-                    <button class="priority-btn skip" onclick="setPriority(this.parentElement.parentElement, 'skip')">SKIP</button>
-                </div>
-                <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
-            </div>
-            <div class="event gaming" contenteditable="true">Red Alert: Murder at Starbase Sentinel
-                <div class="priority-buttons">
-                    <button class="priority-btn high" onclick="setPriority(this.parentElement.parentElement, 'high')">HIGH</button>
-                    <button class="priority-btn maybe" onclick="setPriority(this.parentElement.parentElement, 'maybe')">MAYBE</button>
-                    <button class="priority-btn skip" onclick="setPriority(this.parentElement.parentElement, 'skip')">SKIP</button>
-                </div>
-                <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
-            </div>
-            <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
-        </div>
-        
-        <div class="time-slot">
-            <div class="time-header">10:00 PM <span class="overlap-warning">⚠️ 2 OVERLAPPING</span></div>
-            <div class="event party-show" contenteditable="true">Hissin' 'n' Kissin' Live: Werewolves vs. Vampires
-                <div class="priority-buttons">
-                    <button class="priority-btn high" onclick="setPriority(this.parentElement.parentElement, 'high')">HIGH</button>
-                    <button class="priority-btn maybe" onclick="setPriority(this.parentElement.parentElement, 'maybe')">MAYBE</button>
-                    <button class="priority-btn skip" onclick="setPriority(this.parentElement.parentElement, 'skip')">SKIP</button>
-                </div>
-                <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
-            </div>
-            <div class="event party-show" contenteditable="true">Monsterotica Romantasy Biology Class (Mature Audience 18+)
-                <div class="priority-buttons">
-                    <button class="priority-btn high" onclick="setPriority(this.parentElement.parentElement, 'high')">HIGH</button>
-                    <button class="priority-btn maybe" onclick="setPriority(this.parentElement.parentElement, 'maybe')">MAYBE</button>
-                    <button class="priority-btn skip" onclick="setPriority(this.parentElement.parentElement, 'skip')">SKIP</button>
-                </div>
-                <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
-            </div>
-            <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
-        </div>
-        
-        <div class="time-slot">
-            <div class="time-header">11:30 PM <span class="overlap-warning">⚠️ 2 OVERLAPPING</span></div>
-            <div class="event science-tech" contenteditable="true">LIVE ASTRONOMY!!
-                <div class="priority-buttons">
-                    <button class="priority-btn high" onclick="setPriority(this.parentElement.parentElement, 'high')">HIGH</button>
-                    <button class="priority-btn maybe" onclick="setPriority(this.parentElement.parentElement, 'maybe')">MAYBE</button>
-                    <button class="priority-btn skip" onclick="setPriority(this.parentElement.parentElement, 'skip')">SKIP</button>
-                </div>
-                <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
-            </div>
-            <div class="event party-show" contenteditable="true">Whose Line Is It Anyway?
-                <div class="priority-buttons">
-                    <button class="priority-btn high" onclick="setPriority(this.parentElement.parentElement, 'high')">HIGH</button>
-                    <button class="priority-btn maybe" onclick="setPriority(this.parentElement.parentElement, 'maybe')">MAYBE</button>
-                    <button class="priority-btn skip" onclick="setPriority(this.parentElement.parentElement, 'skip')">SKIP</button>
-                </div>
-                <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
-            </div>
-            <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
-        </div>
-    </div>
-    
-    <div class="day-section">
-        <h2>📅 Saturday, August 30</h2>
-        <div class="time-slot">
-            <div class="time-header">8:30 AM</div>
-            <div class="event special" contenteditable="true">Dragon Con Parade Spectacular: The Ultimate Fan March!
-                <div class="priority-buttons">
-                    <button class="priority-btn high" onclick="setPriority(this.parentElement.parentElement, 'high')">HIGH</button>
-                    <button class="priority-btn maybe" onclick="setPriority(this.parentElement.parentElement, 'maybe')">MAYBE</button>
-                    <button class="priority-btn skip" onclick="setPriority(this.parentElement.parentElement, 'skip')">SKIP</button>
-                </div>
-                <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
-            </div>
-            <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
-        </div>
-        
-        <div class="time-slot">
-            <div class="time-header">9:00 AM</div>
-            <div class="event science-tech" contenteditable="true">Space Combat in Movies, Books and Games: Getting It Not Wrong, NSDM Seminar
-                <div class="priority-buttons">
-                    <button class="priority-btn high" onclick="setPriority(this.parentElement.parentElement, 'high')">HIGH</button>
-                    <button class="priority-btn maybe" onclick="setPriority(this.parentElement.parentElement, 'maybe')">MAYBE</button>
-                    <button class="priority-btn skip" onclick="setPriority(this.parentElement.parentElement, 'skip')">SKIP</button>
-                </div>
-                <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
-            </div>
-            <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
-        </div>
-        
-        <div class="time-slot">
-            <div class="time-header">10:00 AM</div>
-            <div class="event special" contenteditable="true">🎉 25th Annual Dragon Con Parade!
-                <div class="priority-buttons">
-                    <button class="priority-btn high" onclick="setPriority(this.parentElement.parentElement, 'high')">HIGH</button>
-                    <button class="priority-btn maybe" onclick="setPriority(this.parentElement.parentElement, 'maybe')">MAYBE</button>
-                    <button class="priority-btn skip" onclick="setPriority(this.parentElement.parentElement, 'skip')">SKIP</button>
-                </div>
-                <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
-            </div>
-            <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
-        </div>
-        
-        <div class="time-slot">
-            <div class="time-header">10:30 AM</div>
-            <div class="event combat" contenteditable="true">Dragon's Cup: The Knightly Art of Single Combat
-                <div class="priority-buttons">
-                    <button class="priority-btn high" onclick="setPriority(this.parentElement.parentElement, 'high')">HIGH</button>
-                    <button class="priority-btn maybe" onclick="setPriority(this.parentElement.parentElement, 'maybe')">MAYBE</button>
-                    <button class="priority-btn skip" onclick="setPriority(this.parentElement.parentElement, 'skip')">SKIP</button>
-                </div>
-                <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
-            </div>
-            <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
-        </div>
-        
-        <div class="time-slot">
-            <div class="time-header">11:30 AM <span class="overlap-warning">⚠️ 3 OVERLAPPING</span></div>
-            <div class="event litrpg" contenteditable="true">LitRPG Raid Charity Auction Preview
-                <div class="priority-buttons">
-                    <button class="priority-btn high" onclick="setPriority(this.parentElement.parentElement, 'high')">HIGH</button>
-                    <button class="priority-btn maybe" onclick="setPriority(this.parentElement.parentElement, 'maybe')">MAYBE</button>
-                    <button class="priority-btn skip" onclick="setPriority(this.parentElement.parentElement, 'skip')">SKIP</button>
-                </div>
-                <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
-            </div>
-            <div class="event gaming" contenteditable="true">Murder Most Felt: A Puppet Murder Mystery Game
-                <div class="priority-buttons">
-                    <button class="priority-btn high" onclick="setPriority(this.parentElement.parentElement, 'high')">HIGH</button>
-                    <button class="priority-btn maybe" onclick="setPriority(this.parentElement.parentElement, 'maybe')">MAYBE</button>
-                    <button class="priority-btn skip" onclick="setPriority(this.parentElement.parentElement, 'skip')">SKIP</button>
-                </div>
-                <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
-            </div>
-            <div class="event tv-show" contenteditable="true">Psych: Mind over Magic
-                <div class="priority-buttons">
-                    <button class="priority-btn high" onclick="setPriority(this.parentElement.parentElement, 'high')">HIGH</button>
-                    <button class="priority-btn maybe" onclick="setPriority(this.parentElement.parentElement, 'maybe')">MAYBE</button>
-                    <button class="priority-btn skip" onclick="setPriority(this.parentElement.parentElement, 'skip')">SKIP</button>
-                </div>
-                <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
-            </div>
-            <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
-        </div>
-        
-        <div class="time-slot">
-            <div class="time-header">1:00 PM <span class="overlap-warning">⚠️ 3 OVERLAPPING</span></div>
-            <div class="event writing" contenteditable="true">Adventures of the Strange and Unusual
-                <div class="priority-buttons">
-                    <button class="priority-btn high" onclick="setPriority(this.parentElement.parentElement, 'high')">HIGH</button>
-                    <button class="priority-btn maybe" onclick="setPriority(this.parentElement.parentElement, 'maybe')">MAYBE</button>
-                    <button class="priority-btn skip" onclick="setPriority(this.parentElement.parentElement, 'skip')">SKIP</button>
-                </div>
-                <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
-            </div>
-            <div class="event science-tech" contenteditable="true">AuDHDND
-                <div class="priority-buttons">
-                    <button class="priority-btn high" onclick="setPriority(this.parentElement.parentElement, 'high')">HIGH</button>
-                    <button class="priority-btn maybe" onclick="setPriority(this.parentElement.parentElement, 'maybe')">MAYBE</button>
-                    <button class="priority-btn skip" onclick="setPriority(this.parentElement.parentElement, 'skip')">SKIP</button>
-                </div>
-                <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
-            </div>
-            <div class="event gaming" contenteditable="true">Scavenger Hunt Bingo
-                <div class="priority-buttons">
-                    <button class="priority-btn high" onclick="setPriority(this.parentElement.parentElement, 'high')">HIGH</button>
-                    <button class="priority-btn maybe" onclick="setPriority(this.parentElement.parentElement, 'maybe')">MAYBE</button>
-                    <button class="priority-btn skip" onclick="setPriority(this.parentElement.parentElement, 'skip')">SKIP</button>
-                </div>
-                <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
-            </div>
-            <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
-        </div>
-        
-        <div class="time-slot">
-            <div class="time-header">2:30 PM <span class="overlap-warning">⚠️ 3 OVERLAPPING</span></div>
-            <div class="event gaming" contenteditable="true">Classic Sci-Fi Fandom Feud
-                <div class="priority-buttons">
-                    <button class="priority-btn high" onclick="setPriority(this.parentElement.parentElement, 'high')">HIGH</button>
-                    <button class="priority-btn maybe" onclick="setPriority(this.parentElement.parentElement, 'maybe')">MAYBE</button>
-                    <button class="priority-btn skip" onclick="setPriority(this.parentElement.parentElement, 'skip')">SKIP</button>
-                </div>
-                <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
-            </div>
-            <div class="event writing" contenteditable="true">Magic Mechanics and Myth-Making: Writing Tips from Top Fantasy Authors
-                <div class="priority-buttons">
-                    <button class="priority-btn high" onclick="setPriority(this.parentElement.parentElement, 'high')">HIGH</button>
-                    <button class="priority-btn maybe" onclick="setPriority(this.parentElement.parentElement, 'maybe')">MAYBE</button>
-                    <button class="priority-btn skip" onclick="setPriority(this.parentElement.parentElement, 'skip')">SKIP</button>
-                </div>
-                <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
-            </div>
-            <div class="event science-tech" contenteditable="true">Neurodivergence & Space Science - Ground Support to Crew Selection
-                <div class="priority-buttons">
-                    <button class="priority-btn high" onclick="setPriority(this.parentElement.parentElement, 'high')">HIGH</button>
-                    <button class="priority-btn maybe" onclick="setPriority(this.parentElement.parentElement, 'maybe')">MAYBE</button>
-                    <button class="priority-btn skip" onclick="setPriority(this.parentElement.parentElement, 'skip')">SKIP</button>
-                </div>
-                <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
-            </div>
-            <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
-        </div>
-        
-        <div class="time-slot">
-            <div class="time-header">3:00 PM <span class="overlap-warning">⚠️ 2 OVERLAPPING</span></div>
-            <div class="event combat" contenteditable="true">Dragon's Cup: Knightly Mass Combat
-                <div class="priority-buttons">
-                    <button class="priority-btn high" onclick="setPriority(this.parentElement.parentElement, 'high')">HIGH</button>
-                    <button class="priority-btn maybe" onclick="setPriority(this.parentElement.parentElement, 'maybe')">MAYBE</button>
-                    <button class="priority-btn skip" onclick="setPriority(this.parentElement.parentElement, 'skip')">SKIP</button>
-                </div>
-                <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
-            </div>
-            <div class="event cosplay" contenteditable="true">Over30cosplay- For Cosplayers Aged 30 - 300
-                <div class="priority-buttons">
-                    <button class="priority-btn high" onclick="setPriority(this.parentElement.parentElement, 'high')">HIGH</button>
-                    <button class="priority-btn maybe" onclick="setPriority(this.parentElement.parentElement, 'maybe')">MAYBE</button>
-                    <button class="priority-btn skip" onclick="setPriority(this.parentElement.parentElement, 'skip')">SKIP</button>
-                </div>
-                <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
-            </div>
-            <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
-        </div>
-        
-        <div class="time-slot">
-            <div class="time-header">4:00 PM</div>
-            <div class="event cosplay" contenteditable="true">Anime/Animation Cosplay Contest
-                <div class="priority-buttons">
-                    <button class="priority-btn high" onclick="setPriority(this.parentElement.parentElement, 'high')">HIGH</button>
-                    <button class="priority-btn maybe" onclick="setPriority(this.parentElement.parentElement, 'maybe')">MAYBE</button>
-                    <button class="priority-btn skip" onclick="setPriority(this.parentElement.parentElement, 'skip')">SKIP</button>
-                </div>
-                <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
-            </div>
-            <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
-        </div>
-        
-        <div class="time-slot">
-            <div class="time-header">5:00 PM</div>
-            <div class="event combat" contenteditable="true">Dragon's Cup: Dragon Battles
-                <div class="priority-buttons">
-                    <button class="priority-btn high" onclick="setPriority(this.parentElement.parentElement, 'high')">HIGH</button>
-                    <button class="priority-btn maybe" onclick="setPriority(this.parentElement.parentElement, 'maybe')">MAYBE</button>
-                    <button class="priority-btn skip" onclick="setPriority(this.parentElement.parentElement, 'skip')">SKIP</button>
-                </div>
-                <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
-            </div>
-            <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
-        </div>
-        
-        <div class="time-slot">
-            <div class="time-header">5:30 PM <span class="overlap-warning">⚠️ 2 OVERLAPPING</span></div>
-            <div class="event apocalypse" contenteditable="true">Apocalypse POV: Survivors
-                <div class="priority-buttons">
-                    <button class="priority-btn high" onclick="setPriority(this.parentElement.parentElement, 'high')">HIGH</button>
-                    <button class="priority-btn maybe" onclick="setPriority(this.parentElement.parentElement, 'maybe')">MAYBE</button>
-                    <button class="priority-btn skip" onclick="setPriority(this.parentElement.parentElement, 'skip')">SKIP</button>
-                </div>
-                <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
-            </div>
-            <div class="event party-show" contenteditable="true">Very Random Encounters - LIVE!
-                <div class="priority-buttons">
-                    <button class="priority-btn high" onclick="setPriority(this.parentElement.parentElement, 'high')">HIGH</button>
-                    <button class="priority-btn maybe" onclick="setPriority(this.parentElement.parentElement, 'maybe')">MAYBE</button>
-                    <button class="priority-btn skip" onclick="setPriority(this.parentElement.parentElement, 'skip')">SKIP</button>
-                </div>
-                <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
-            </div>
-            <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
-        </div>
-        
-        <div class="time-slot">
-            <div class="time-header">7:00 PM</div>
-            <div class="event special" contenteditable="true">Dragon Con Night at the Georgia Aquarium **EXTRA FEE EVENT** $$
-                <div class="priority-buttons">
-                    <button class="priority-btn high" onclick="setPriority(this.parentElement.parentElement, 'high')">HIGH</button>
-                    <button class="priority-btn maybe" onclick="setPriority(this.parentElement.parentElement, 'maybe')">MAYBE</button>
-                    <button class="priority-btn skip" onclick="setPriority(this.parentElement.parentElement, 'skip')">SKIP</button>
-                </div>
-                <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
-            </div>
-            <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
-        </div>
-        
-        <div class="time-slot">
-            <div class="time-header">7:30 PM</div>
-            <div class="event cosplay" contenteditable="true">The Cults of Dragon Con Costume Contest
-                <div class="priority-buttons">
-                    <button class="priority-btn high" onclick="setPriority(this.parentElement.parentElement, 'high')">HIGH</button>
-                    <button class="priority-btn maybe" onclick="setPriority(this.parentElement.parentElement, 'maybe')">MAYBE</button>
-                    <button class="priority-btn skip" onclick="setPriority(this.parentElement.parentElement, 'skip')">SKIP</button>
-                </div>
-                <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
-            </div>
-            <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
-        </div>
-        
-        <div class="time-slot">
-            <div class="time-header">8:30 PM</div>
-            <div class="event gaming" contenteditable="true">Delphic Oracle
-                <div class="priority-buttons">
-                    <button class="priority-btn high" onclick="setPriority(this.parentElement.parentElement, 'high')">HIGH</button>
-                    <button class="priority-btn maybe" onclick="setPriority(this.parentElement.parentElement, 'maybe')">MAYBE</button>
-                    <button class="priority-btn skip" onclick="setPriority(this.parentElement.parentElement, 'skip')">SKIP</button>
-                </div>
-                <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
-            </div>
-            <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
-        </div>
-        
-        <div class="time-slot">
-            <div class="time-header">10:00 PM <span class="overlap-warning">⚠️ 4 OVERLAPPING</span></div>
-            <div class="event party-show" contenteditable="true">Big Damn Game Show!
-                <div class="priority-buttons">
-                    <button class="priority-btn high" onclick="setPriority(this.parentElement.parentElement, 'high')">HIGH</button>
-                    <button class="priority-btn maybe" onclick="setPriority(this.parentElement.parentElement, 'maybe')">MAYBE</button>
-                    <button class="priority-btn skip" onclick="setPriority(this.parentElement.parentElement, 'skip')">SKIP</button>
-                </div>
-                <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
-            </div>
-            <div class="event party-show" contenteditable="true">Fantasy Dating Game: Will Our Characters Find a Match?
-                <div class="priority-buttons">
-                    <button class="priority-btn high" onclick="setPriority(this.parentElement.parentElement, 'high')">HIGH</button>
-                    <button class="priority-btn maybe" onclick="setPriority(this.parentElement.parentElement, 'maybe')">MAYBE</button>
-                    <button class="priority-btn skip" onclick="setPriority(this.parentElement.parentElement, 'skip')">SKIP</button>
-                </div>
-                <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
-            </div>
-            <div class="event party-show" contenteditable="true">Solve for X: Nerd Nite Dragon Con! (Mature Audience 18+)
-                <div class="priority-buttons">
-                    <button class="priority-btn high" onclick="setPriority(this.parentElement.parentElement, 'high')">HIGH</button>
-                    <button class="priority-btn maybe" onclick="setPriority(this.parentElement.parentElement, 'maybe')">MAYBE</button>
-                    <button class="priority-btn skip" onclick="setPriority(this.parentElement.parentElement, 'skip')">SKIP</button>
-                </div>
-                <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
-            </div>
-            <div class="event writing" contenteditable="true">Vampires vs. Demons: A Black Dagger Brotherhood Fan Panel
-                <div class="priority-buttons">
-                    <button class="priority-btn high" onclick="setPriority(this.parentElement.parentElement, 'high')">HIGH</button>
-                    <button class="priority-btn maybe" onclick="setPriority(this.parentElement.parentElement, 'maybe')">MAYBE</button>
-                    <button class="priority-btn skip" onclick="setPriority(this.parentElement.parentElement, 'skip')">SKIP</button>
-                </div>
-                <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
-            </div>
-            <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
-        </div>
-    </div>
-    
-    <div class="day-section">
-        <h2>📅 Sunday, August 31</h2>
-        <div class="time-slot">
-            <div class="time-header">12:00 AM (Midnight)</div>
-            <div class="event party-show" contenteditable="true">Dragon Con Burlesque: A Glamour Geek Revue
-                <div class="priority-buttons">
-                    <button class="priority-btn high" onclick="setPriority(this.parentElement.parentElement, 'high')">HIGH</button>
-                    <button class="priority-btn maybe" onclick="setPriority(this.parentElement.parentElement, 'maybe')">MAYBE</button>
-                    <button class="priority-btn skip" onclick="setPriority(this.parentElement.parentElement, 'skip')">SKIP</button>
-                </div>
-                <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
-            </div>
-            <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
-        </div>
-        
-        <div class="time-slot">
-            <div class="time-header">10:00 AM <span class="overlap-warning">⚠️ 3 OVERLAPPING</span></div>
-            <div class="event tv-show" contenteditable="true">Bones cast - Working the Evidence
-                <div class="priority-buttons">
-                    <button class="priority-btn high" onclick="setPriority(this.parentElement.parentElement, 'high')">HIGH</button>
-                    <button class="priority-btn maybe" onclick="setPriority(this.parentElement.parentElement, 'maybe')">MAYBE</button>
-                    <button class="priority-btn skip" onclick="setPriority(this.parentElement.parentElement, 'skip')">SKIP</button>
-                </div>
-                <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
-            </div>
-            <div class="event litrpg" contenteditable="true">How to Destroy the World 101: Doing It LitRPG Style
-                <div class="priority-buttons">
-                    <button class="priority-btn high" onclick="setPriority(this.parentElement.parentElement, 'high')">HIGH</button>
-                    <button class="priority-btn maybe" onclick="setPriority(this.parentElement.parentElement, 'maybe')">MAYBE</button>
-                    <button class="priority-btn skip" onclick="setPriority(this.parentElement.parentElement, 'skip')">SKIP</button>
-                </div>
-                <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
-            </div>
-            <div class="event writing" contenteditable="true">Military Veterans Who Write
-                <div class="priority-buttons">
-                    <button class="priority-btn high" onclick="setPriority(this.parentElement.parentElement, 'high')">HIGH</button>
-                    <button class="priority-btn maybe" onclick="setPriority(this.parentElement.parentElement, 'maybe')">MAYBE</button>
-                    <button class="priority-btn skip" onclick="setPriority(this.parentElement.parentElement, 'skip')">SKIP</button>
-                </div>
-                <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
-            </div>
-            <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
-        </div>
-        
-        <div class="time-slot">
-            <div class="time-header">11:30 AM <span class="overlap-warning">⚠️ 2 OVERLAPPING</span></div>
-            <div class="event science-tech" contenteditable="true">Gaming and Neurodiversity
-                <div class="priority-buttons">
-                    <button class="priority-btn high" onclick="setPriority(this.parentElement.parentElement, 'high')">HIGH</button>
-                    <button class="priority-btn maybe" onclick="setPriority(this.parentElement.parentElement, 'maybe')">MAYBE</button>
-                    <button class="priority-btn skip" onclick="setPriority(this.parentElement.parentElement, 'skip')">SKIP</button>
-                </div>
-                <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
-            </div>
-            <div class="event litrpg" contenteditable="true">How to Dungeon Crawl and Make It Fun
-                <div class="priority-buttons">
-                    <button class="priority-btn high" onclick="setPriority(this.parentElement.parentElement, 'high')">HIGH</button>
-                    <button class="priority-btn maybe" onclick="setPriority(this.parentElement.parentElement, 'maybe')">MAYBE</button>
-                    <button class="priority-btn skip" onclick="setPriority(this.parentElement.parentElement, 'skip')">SKIP</button>
-                </div>
-                <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
-            </div>
-            <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
-        </div>
-        
-        <div class="time-slot">
-            <div class="time-header">12:30 PM</div>
-            <div class="event tv-show" contenteditable="true">Sailor Moon
-                <div class="priority-buttons">
-                    <button class="priority-btn high" onclick="setPriority(this.parentElement.parentElement, 'high')">HIGH</button>
-                    <button class="priority-btn maybe" onclick="setPriority(this.parentElement.parentElement, 'maybe')">MAYBE</button>
-                    <button class="priority-btn skip" onclick="setPriority(this.parentElement.parentElement, 'skip')">SKIP</button>
-                </div>
-                <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
-            </div>
-            <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
-        </div>
-        
-        <div class="time-slot">
-            <div class="time-header">1:00 PM</div>
-            <div class="event litrpg" contenteditable="true">Hi, I'm NOT Matt Dinniman...but I Write LitRPG, too!
-                <div class="priority-buttons">
-                    <button class="priority-btn high" onclick="setPriority(this.parentElement.parentElement, 'high')">HIGH</button>
-                    <button class="priority-btn maybe" onclick="setPriority(this.parentElement.parentElement, 'maybe')">MAYBE</button>
-                    <button class="priority-btn skip" onclick="setPriority(this.parentElement.parentElement, 'skip')">SKIP</button>
-                </div>
-                <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
-            </div>
-            <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
-        </div>
-        
-        <div class="time-slot">
-            <div class="time-header">2:30 PM <span class="overlap-warning">⚠️ 3 OVERLAPPING</span></div>
-            <div class="event apocalypse" contenteditable="true">Apocalypse POV: Creating and Ending the World
-                <div class="priority-buttons">
-                    <button class="priority-btn high" onclick="setPriority(this.parentElement.parentElement, 'high')">HIGH</button>
-                    <button class="priority-btn maybe" onclick="setPriority(this.parentElement.parentElement, 'maybe')">MAYBE</button>
-                    <button class="priority-btn skip" onclick="setPriority(this.parentElement.parentElement, 'skip')">SKIP</button>
-                </div>
-                <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
-            </div>
-            <div class="event tv-show" contenteditable="true">Psych: Solving Crimes Any Way You Can
-                <div class="priority-buttons">
-                    <button class="priority-btn high" onclick="setPriority(this.parentElement.parentElement, 'high')">HIGH</button>
-                    <button class="priority-btn maybe" onclick="setPriority(this.parentElement.parentElement, 'maybe')">MAYBE</button>
-                    <button class="priority-btn skip" onclick="setPriority(this.parentElement.parentElement, 'skip')">SKIP</button>
-                </div>
-                <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
-            </div>
-            <div class="event writing" contenteditable="true">THERE WILL BE DRAGONS!!!!!!!!!! Now and Forever
-                <div class="priority-buttons">
-                    <button class="priority-btn high" onclick="setPriority(this.parentElement.parentElement, 'high')">HIGH</button>
-                    <button class="priority-btn maybe" onclick="setPriority(this.parentElement.parentElement, 'maybe')">MAYBE</button>
-                    <button class="priority-btn skip" onclick="setPriority(this.parentElement.parentElement, 'skip')">SKIP</button>
-                </div>
-                <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
-            </div>
-            <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
-        </div>
-        
-        <div class="time-slot">
-            <div class="time-header">4:00 PM <span class="overlap-warning">⚠️ 2 OVERLAPPING</span></div>
-            <div class="event writing" contenteditable="true">Apocalyptic Fiction: What Are You Reading Now?
-                <div class="priority-buttons">
-                    <button class="priority-btn high" onclick="setPriority(this.parentElement.parentElement, 'high')">HIGH</button>
-                    <button class="priority-btn maybe" onclick="setPriority(this.parentElement.parentElement, 'maybe')">MAYBE</button>
-                    <button class="priority-btn skip" onclick="setPriority(this.parentElement.parentElement, 'skip')">SKIP</button>
-                </div>
-                <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
-            </div>
-            <div class="event party-show" contenteditable="true">Welcome to Fandom Face-Off: The Ultimate Gameshow of Bad Choices!
-                <div class="priority-buttons">
-                    <button class="priority-btn high" onclick="setPriority(this.parentElement.parentElement, 'high')">HIGH</button>
-                    <button class="priority-btn maybe" onclick="setPriority(this.parentElement.parentElement, 'maybe')">MAYBE</button>
-                    <button class="priority-btn skip" onclick="setPriority(this.parentElement.parentElement, 'skip')">SKIP</button>
-                </div>
-                <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
-            </div>
-            <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
-        </div>
-        
-        <div class="time-slot">
-            <div class="time-header">5:30 PM</div>
-            <div class="event special" contenteditable="true">Loyal Order of the Ribbon: Annual Hyatt Ribbon Drop!
-                <div class="priority-buttons">
-                    <button class="priority-btn high" onclick="setPriority(this.parentElement.parentElement, 'high')">HIGH</button>
-                    <button class="priority-btn maybe" onclick="setPriority(this.parentElement.parentElement, 'maybe')">MAYBE</button>
-                    <button class="priority-btn skip" onclick="setPriority(this.parentElement.parentElement, 'skip')">SKIP</button>
-                </div>
-                <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
-            </div>
-            <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
-        </div>
-        
-        <div class="time-slot">
-            <div class="time-header">7:00 PM</div>
-            <div class="event litrpg" contenteditable="true">LitRPG Raid Extravaganza! Scavenger Hunt and Silent Auction
-                <div class="priority-buttons">
-                    <button class="priority-btn high" onclick="setPriority(this.parentElement.parentElement, 'high')">HIGH</button>
-                    <button class="priority-btn maybe" onclick="setPriority(this.parentElement.parentElement, 'maybe')">MAYBE</button>
-                    <button class="priority-btn skip" onclick="setPriority(this.parentElement.parentElement, 'skip')">SKIP</button>
-                </div>
-                <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
-            </div>
-            <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
-        </div>
-        
-        <div class="time-slot">
-            <div class="time-header">10:00 PM</div>
-            <div class="event party-show" contenteditable="true">Cosplay Party Extravaganza: Unleash Your Inner Hero!
-                <div class="priority-buttons">
-                    <button class="priority-btn high" onclick="setPriority(this.parentElement.parentElement, 'high')">HIGH</button>
-                    <button class="priority-btn maybe" onclick="setPriority(this.parentElement.parentElement, 'maybe')">MAYBE</button>
-                    <button class="priority-btn skip" onclick="setPriority(this.parentElement.parentElement, 'skip')">SKIP</button>
-                </div>
-                <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
-            </div>
-            <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
-        </div>
-    </div>
-    
-    <div class="day-section">
-        <h2>📅 Monday, September 1</h2>
-        <div class="time-slot">
-            <div class="time-header">10:00 AM</div>
-            <div class="event litrpg" contenteditable="true">The Juicy Crunch! The Juice Is Always Worth the Crunch in LitRPG
-                <div class="priority-buttons">
-                    <button class="priority-btn high" onclick="setPriority(this.parentElement.parentElement, 'high')">HIGH</button>
-                    <button class="priority-btn maybe" onclick="setPriority(this.parentElement.parentElement, 'maybe')">MAYBE</button>
-                    <button class="priority-btn skip" onclick="setPriority(this.parentElement.parentElement, 'skip')">SKIP</button>
-                </div>
-                <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
-            </div>
-            <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
-        </div>
-    </div>
-    
-    <!-- Script for interactivity -->
     <script>
+        // Store attendees
+        let attendees = [];
+        let eventData = {};
+        
+        // Initialize default attendees
+        function initializeAttendees() {
+            addAttendee('Me', 1);
+            addAttendee('Friend 1', 2);
+        }
+        
+        // Add attendee
+        function addAttendee(name, colorId) {
+            if (!name && !colorId) {
+                name = document.getElementById('attendeeName').value.trim();
+                colorId = document.getElementById('attendeeColor').value;
+            }
+            
+            if (!name) {
+                alert('Please enter a name');
+                return;
+            }
+            
+            if (attendees.length >= 8) {
+                alert('Maximum 8 attendees');
+                return;
+            }
+            
+            const attendee = {
+                id: Date.now() + Math.random(),
+                name: name,
+                colorId: colorId
+            };
+            
+            attendees.push(attendee);
+            updateAttendeeList();
+            updateAllEventBadges();
+            
+            if (!name || !colorId) {
+                document.getElementById('attendeeName').value = '';
+            }
+        }
+        
+        // Update attendee list display
+        function updateAttendeeList() {
+            const list = document.getElementById('attendeeList');
+            list.innerHTML = attendees.map(a => `
+                <div class="attendee-chip attendee-${a.colorId}">
+                    ${a.name}
+                    <span class="remove" onclick="removeAttendee(${a.id})">✕</span>
+                </div>
+            `).join('');
+        }
+        
+        // Remove attendee
+        function removeAttendee(id) {
+            attendees = attendees.filter(a => a.id !== id);
+            updateAttendeeList();
+            updateAllEventBadges();
+        }
+        
+        // Toggle attendee for event
+        function toggleAttendee(eventId, attendeeId) {
+            if (!eventData[eventId]) {
+                eventData[eventId] = { attendees: [] };
+            }
+            
+            const index = eventData[eventId].attendees.indexOf(attendeeId);
+            if (index > -1) {
+                eventData[eventId].attendees.splice(index, 1);
+            } else {
+                eventData[eventId].attendees.push(attendeeId);
+            }
+            
+            updateEventBadges(eventId);
+            checkTimeSlotConflicts(eventId);
+        }
+        
+        // Update badges for an event
+        function updateEventBadges(eventId) {
+            const badgesContainer = document.querySelector(`[data-event-id="${eventId}"] .attendee-badges`);
+            if (!badgesContainer) return;
+            
+            const activeAttendees = eventData[eventId]?.attendees || [];
+            
+            badgesContainer.innerHTML = attendees.map(a => `
+                <span class="attendee-badge attendee-${a.colorId} ${activeAttendees.includes(a.id) ? 'active' : ''}"
+                      onclick="toggleAttendee('${eventId}', ${a.id})">
+                    ${a.name}
+                </span>
+            `).join('');
+        }
+        
+        // Update all event badges
+        function updateAllEventBadges() {
+            document.querySelectorAll('.event').forEach(event => {
+                const eventId = event.dataset.eventId;
+                if (eventId) {
+                    updateEventBadges(eventId);
+                }
+            });
+        }
+        
+        // Check for conflicts in a time slot
+        function checkTimeSlotConflicts(eventId) {
+            const event = document.querySelector(`[data-event-id="${eventId}"]`);
+            const timeSlot = event.closest('.time-slot');
+            const events = timeSlot.querySelectorAll('.event');
+            
+            if (events.length <= 1) return;
+            
+            // Check if different attendees want different events
+            let conflicts = [];
+            events.forEach(e => {
+                const eId = e.dataset.eventId;
+                const attendeeList = eventData[eId]?.attendees || [];
+                if (attendeeList.length > 0) {
+                    conflicts.push({
+                        eventName: e.querySelector('.event-title').textContent,
+                        attendees: attendeeList.map(id => attendees.find(a => a.id === id)?.name)
+                    });
+                }
+            });
+            
+            // Show conflict summary if needed
+            let summary = timeSlot.querySelector('.conflict-summary');
+            if (conflicts.length > 1) {
+                if (!summary) {
+                    summary = document.createElement('div');
+                    summary.className = 'conflict-summary';
+                    timeSlot.appendChild(summary);
+                }
+                
+                summary.innerHTML = `
+                    <h4>⚠️ Group Split Required!</h4>
+                    ${conflicts.map(c => `<div><strong>${c.eventName}:</strong> ${c.attendees.join(', ')}</div>`).join('')}
+                `;
+                summary.classList.add('show');
+            } else if (summary) {
+                summary.classList.remove('show');
+            }
+        }
+        
+        // Delete event
         function deleteEvent(btn) {
             if(confirm('Remove this event from your schedule?')) {
-                btn.parentElement.remove();
-                updateOverlapWarnings();
+                const event = btn.closest('.event');
+                const eventId = event.dataset.eventId;
+                delete eventData[eventId];
+                event.remove();
             }
         }
         
-        function setPriority(element, priority) {
-            element.classList.remove('priority-high', 'priority-maybe', 'priority-skip');
-            element.classList.add('priority-' + priority);
-        }
-        
+        // Add new event
         function addEvent(btn) {
+            const eventId = 'event-' + Date.now();
             const newEvent = document.createElement('div');
             newEvent.className = 'event gaming';
-            newEvent.contentEditable = true;
-            newEvent.innerHTML = `New Event - Click to Edit
-                <div class="priority-buttons">
-                    <button class="priority-btn high" onclick="setPriority(this.parentElement.parentElement, 'high')">HIGH</button>
-                    <button class="priority-btn maybe" onclick="setPriority(this.parentElement.parentElement, 'maybe')">MAYBE</button>
-                    <button class="priority-btn skip" onclick="setPriority(this.parentElement.parentElement, 'skip')">SKIP</button>
-                </div>
-                <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>`;
+            newEvent.dataset.eventId = eventId;
+            newEvent.innerHTML = `
+                <div class="event-title" contenteditable="true">New Event - Click to Edit</div>
+                <div class="attendee-badges"></div>
+                <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+            `;
             btn.parentElement.insertBefore(newEvent, btn);
-            newEvent.focus();
+            updateEventBadges(eventId);
+            newEvent.querySelector('.event-title').focus();
         }
         
-        function clearAllSkipped() {
-            const skipped = document.querySelectorAll('.priority-skip');
-            if(confirm(`Remove ${skipped.length} skipped events?`)) {
-                skipped.forEach(event => event.remove());
-                updateOverlapWarnings();
-            }
-        }
-        
-        function updateOverlapWarnings() {
-            // This would update overlap counts after deletions
-            // Simplified for this example
-        }
-        
+        // Save schedule
         function saveSchedule() {
-            localStorage.setItem('dragonConSchedule', document.body.innerHTML);
+            const data = {
+                attendees: attendees,
+                eventData: eventData,
+                scheduleHTML: document.getElementById('scheduleContainer').innerHTML
+            };
+            localStorage.setItem('dragonConGroupSchedule', JSON.stringify(data));
             alert('Schedule saved! Your changes will persist in this browser.');
         }
         
+        // Reset schedule
         function resetSchedule() {
             if(confirm('Reset to original schedule? All changes will be lost.')) {
-                localStorage.removeItem('dragonConSchedule');
+                localStorage.removeItem('dragonConGroupSchedule');
                 location.reload();
             }
         }
         
-        // Load saved schedule if exists
+        // Show all conflicts
+        function showConflicts() {
+            document.querySelectorAll('.time-slot').forEach(slot => {
+                const events = slot.querySelectorAll('.event');
+                if (events.length > 1) {
+                    events.forEach(e => {
+                        checkTimeSlotConflicts(e.dataset.eventId);
+                    });
+                }
+            });
+        }
+        
+        // Generate schedule HTML
+        function generateSchedule() {
+            const container = document.getElementById('scheduleContainer');
+            container.innerHTML = `
+            <div class="day-section">
+                <h2>📅 Thursday, August 28</h2>
+                <div class="time-slot">
+                    <div class="time-header">8:30 PM</div>
+                    <div class="event cosplay" data-event-id="thu-830pm-1">
+                        <div class="event-title" contenteditable="true">Page to Stage Cosplay and Costume Contest</div>
+                        <div class="attendee-badges"></div>
+                        <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                    </div>
+                    <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
+                </div>
+            </div>
+            
+            <div class="day-section">
+                <h2>📅 Friday, August 29</h2>
+                <div class="time-slot">
+                    <div class="time-header">1:00 PM</div>
+                    <div class="event science-tech" data-event-id="fri-1pm-1">
+                        <div class="event-title" contenteditable="true">Building Your Own JARVIS: AI across Any Device</div>
+                        <div class="attendee-badges"></div>
+                        <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                    </div>
+                    <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
+                </div>
+                
+                <div class="time-slot">
+                    <div class="time-header">2:30 PM <span class="overlap-warning">⚠️ 2 OVERLAPPING</span></div>
+                    <div class="event apocalypse" data-event-id="fri-230pm-1">
+                        <div class="event-title" contenteditable="true">Apocalypse POV: How It Happened</div>
+                        <div class="attendee-badges"></div>
+                        <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                    </div>
+                    <div class="event writing" data-event-id="fri-230pm-2">
+                        <div class="event-title" contenteditable="true">Military Sci-Fi Writers & Creators - Media Edition</div>
+                        <div class="attendee-badges"></div>
+                        <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                    </div>
+                    <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
+                </div>
+                
+                <div class="time-slot">
+                    <div class="time-header">3:00 PM</div>
+                    <div class="event litrpg" data-event-id="fri-3pm-1">
+                        <div class="event-title" contenteditable="true">Dungeon Crawler Carl</div>
+                        <div class="attendee-badges"></div>
+                        <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                    </div>
+                    <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
+                </div>
+                
+                <div class="time-slot">
+                    <div class="time-header">4:00 PM <span class="overlap-warning">⚠️ 3 OVERLAPPING</span></div>
+                    <div class="event writing" data-event-id="fri-4pm-1">
+                        <div class="event-title" contenteditable="true">Romance + Fantasy = Romantasy: Decoding It All</div>
+                        <div class="attendee-badges"></div>
+                        <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                    </div>
+                    <div class="event writing" data-event-id="fri-4pm-2">
+                        <div class="event-title" contenteditable="true">Shall We Write a Story? Collaborative Short-Story Creation</div>
+                        <div class="attendee-badges"></div>
+                        <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                    </div>
+                    <div class="event writing" data-event-id="fri-4pm-3">
+                        <div class="event-title" contenteditable="true">Writing for Geeks | Creating Engaging Content for Geeks, Gamers, and Fans</div>
+                        <div class="attendee-badges"></div>
+                        <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                    </div>
+                    <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
+                </div>
+                
+                <div class="time-slot">
+                    <div class="time-header">5:30 PM <span class="overlap-warning">⚠️ 3 OVERLAPPING</span></div>
+                    <div class="event tv-show" data-event-id="fri-530pm-1">
+                        <div class="event-title" contenteditable="true">Fallout (TV Show): Fan Discussion Panel</div>
+                        <div class="attendee-badges"></div>
+                        <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                    </div>
+                    <div class="event tv-show" data-event-id="fri-530pm-2">
+                        <div class="event-title" contenteditable="true">Psych: The Powers of Observation and Deduction</div>
+                        <div class="attendee-badges"></div>
+                        <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                    </div>
+                    <div class="event cosplay" data-event-id="fri-530pm-3">
+                        <div class="event-title" contenteditable="true">Video Game Costume Contest</div>
+                        <div class="attendee-badges"></div>
+                        <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                    </div>
+                    <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
+                </div>
+                
+                <div class="time-slot">
+                    <div class="time-header">6:00 PM</div>
+                    <div class="event gaming" data-event-id="fri-6pm-1">
+                        <div class="event-title" contenteditable="true">American Revolution Crisis, (NSDM) MegaGame</div>
+                        <div class="attendee-badges"></div>
+                        <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                    </div>
+                    <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
+                </div>
+                
+                <div class="time-slot">
+                    <div class="time-header">7:00 PM</div>
+                    <div class="event litrpg" data-event-id="fri-7pm-1">
+                        <div class="event-title" contenteditable="true">Improvised Dungeons & Dragons - LIVE!</div>
+                        <div class="attendee-badges"></div>
+                        <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                    </div>
+                    <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
+                </div>
+                
+                <div class="time-slot">
+                    <div class="time-header">8:00 PM</div>
+                    <div class="event writing" data-event-id="fri-8pm-1">
+                        <div class="event-title" contenteditable="true">The Gather: Welcome to Literature</div>
+                        <div class="attendee-badges"></div>
+                        <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                    </div>
+                    <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
+                </div>
+                
+                <div class="time-slot">
+                    <div class="time-header">8:30 PM <span class="overlap-warning">⚠️ 6 OVERLAPPING</span></div>
+                    <div class="event science-tech" data-event-id="fri-830pm-1">
+                        <div class="event-title" contenteditable="true">AI-Assisted Programming for Cosplay Electronics</div>
+                        <div class="attendee-badges"></div>
+                        <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                    </div>
+                    <div class="event party-show" data-event-id="fri-830pm-2">
+                        <div class="event-title" contenteditable="true">Blankety-Blank: The Game Show</div>
+                        <div class="attendee-badges"></div>
+                        <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                    </div>
+                    <div class="event writing" data-event-id="fri-830pm-3">
+                        <div class="event-title" contenteditable="true">Campfire Story Contest</div>
+                        <div class="attendee-badges"></div>
+                        <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                    </div>
+                    <div class="event cosplay" data-event-id="fri-830pm-4">
+                        <div class="event-title" contenteditable="true">Friday Night Costuming Contest</div>
+                        <div class="attendee-badges"></div>
+                        <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                    </div>
+                    <div class="event writing" data-event-id="fri-830pm-5">
+                        <div class="event-title" contenteditable="true">Military Science Fiction and Space Opera</div>
+                        <div class="attendee-badges"></div>
+                        <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                    </div>
+                    <div class="event gaming" data-event-id="fri-830pm-6">
+                        <div class="event-title" contenteditable="true">Red Alert: Murder at Starbase Sentinel</div>
+                        <div class="attendee-badges"></div>
+                        <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                    </div>
+                    <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
+                </div>
+                
+                <div class="time-slot">
+                    <div class="time-header">10:00 PM <span class="overlap-warning">⚠️ 2 OVERLAPPING</span></div>
+                    <div class="event party-show" data-event-id="fri-10pm-1">
+                        <div class="event-title" contenteditable="true">Hissin' 'n' Kissin' Live: Werewolves vs. Vampires</div>
+                        <div class="attendee-badges"></div>
+                        <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                    </div>
+                    <div class="event party-show" data-event-id="fri-10pm-2">
+                        <div class="event-title" contenteditable="true">Monsterotica Romantasy Biology Class (Mature Audience 18+)</div>
+                        <div class="attendee-badges"></div>
+                        <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                    </div>
+                    <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
+                </div>
+                
+                <div class="time-slot">
+                    <div class="time-header">11:30 PM <span class="overlap-warning">⚠️ 2 OVERLAPPING</span></div>
+                    <div class="event science-tech" data-event-id="fri-1130pm-1">
+                        <div class="event-title" contenteditable="true">LIVE ASTRONOMY!!</div>
+                        <div class="attendee-badges"></div>
+                        <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                    </div>
+                    <div class="event party-show" data-event-id="fri-1130pm-2">
+                        <div class="event-title" contenteditable="true">Whose Line Is It Anyway?</div>
+                        <div class="attendee-badges"></div>
+                        <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                    </div>
+                    <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
+                </div>
+            </div>
+            
+            <div class="day-section">
+                <h2>📅 Saturday, August 30</h2>
+                <!-- Continue with all Saturday events... -->
+                <!-- I'll include a few key ones for brevity -->
+                <div class="time-slot">
+                    <div class="time-header">10:00 AM</div>
+                    <div class="event special" data-event-id="sat-10am-1">
+                        <div class="event-title" contenteditable="true">🎉 25th Annual Dragon Con Parade!</div>
+                        <div class="attendee-badges"></div>
+                        <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                    </div>
+                    <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
+                </div>
+                
+                <div class="time-slot">
+                    <div class="time-header">7:00 PM</div>
+                    <div class="event special" data-event-id="sat-7pm-1">
+                        <div class="event-title" contenteditable="true">Dragon Con Night at the Georgia Aquarium **EXTRA FEE EVENT** $$$</div>
+                        <div class="attendee-badges"></div>
+                        <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                    </div>
+                    <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
+                </div>
+            </div>
+            
+            <div class="day-section">
+                <h2>📅 Sunday, August 31</h2>
+                <!-- Key Sunday events -->
+                <div class="time-slot">
+                    <div class="time-header">10:00 AM <span class="overlap-warning">⚠️ 3 OVERLAPPING</span></div>
+                    <div class="event tv-show" data-event-id="sun-10am-1">
+                        <div class="event-title" contenteditable="true">Bones cast - Working the Evidence</div>
+                        <div class="attendee-badges"></div>
+                        <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                    </div>
+                    <div class="event litrpg" data-event-id="sun-10am-2">
+                        <div class="event-title" contenteditable="true">How to Destroy the World 101: Doing It LitRPG Style</div>
+                        <div class="attendee-badges"></div>
+                        <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                    </div>
+                    <div class="event writing" data-event-id="sun-10am-3">
+                        <div class="event-title" contenteditable="true">Military Veterans Who Write</div>
+                        <div class="attendee-badges"></div>
+                        <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                    </div>
+                    <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
+                </div>
+            </div>
+            
+            <div class="day-section">
+                <h2>📅 Monday, September 1</h2>
+                <div class="time-slot">
+                    <div class="time-header">10:00 AM</div>
+                    <div class="event litrpg" data-event-id="mon-10am-1">
+                        <div class="event-title" contenteditable="true">The Juicy Crunch! The Juice Is Always Worth the Crunch in LitRPG</div>
+                        <div class="attendee-badges"></div>
+                        <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                    </div>
+                    <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
+                </div>
+            </div>
+            `;
+        }
+        
+        // Initialize on load
         window.onload = function() {
-            const saved = localStorage.getItem('dragonConSchedule');
-            if(saved && confirm('Load your previously saved schedule?')) {
-                document.body.innerHTML = saved;
+            const saved = localStorage.getItem('dragonConGroupSchedule');
+            if (saved) {
+                const data = JSON.parse(saved);
+                attendees = data.attendees || [];
+                eventData = data.eventData || {};
+                document.getElementById('scheduleContainer').innerHTML = data.scheduleHTML || '';
+                updateAttendeeList();
+                updateAllEventBadges();
+            } else {
+                initializeAttendees();
+                generateSchedule();
+                updateAllEventBadges();
             }
         }
     </script>
