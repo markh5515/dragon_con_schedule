@@ -887,8 +887,26 @@
             
             <div class="day-section">
                 <h2>📅 Saturday, August 30</h2>
-                <!-- Continue with all Saturday events... -->
-                <!-- I'll include a few key ones for brevity -->
+                <div class="time-slot">
+                    <div class="time-header">8:30 AM</div>
+                    <div class="event special" data-event-id="sat-830am-1">
+                        <div class="event-title" contenteditable="true">Dragon Con Parade Spectacular: The Ultimate Fan March!</div>
+                        <div class="attendee-badges"></div>
+                        <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                    </div>
+                    <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
+                </div>
+                
+                <div class="time-slot">
+                    <div class="time-header">9:00 AM</div>
+                    <div class="event science-tech" data-event-id="sat-9am-1">
+                        <div class="event-title" contenteditable="true">Space Combat in Movies, Books and Games: Getting It Not Wrong, NSDM Seminar</div>
+                        <div class="attendee-badges"></div>
+                        <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                    </div>
+                    <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
+                </div>
+                
                 <div class="time-slot">
                     <div class="time-header">10:00 AM</div>
                     <div class="event special" data-event-id="sat-10am-1">
@@ -900,9 +918,174 @@
                 </div>
                 
                 <div class="time-slot">
+                    <div class="time-header">10:30 AM</div>
+                    <div class="event combat" data-event-id="sat-1030am-1">
+                        <div class="event-title" contenteditable="true">Dragon's Cup: The Knightly Art of Single Combat</div>
+                        <div class="attendee-badges"></div>
+                        <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                    </div>
+                    <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
+                </div>
+                
+                <div class="time-slot">
+                    <div class="time-header">11:30 AM <span class="overlap-warning">⚠️ 3 OVERLAPPING</span></div>
+                    <div class="event litrpg" data-event-id="sat-1130am-1">
+                        <div class="event-title" contenteditable="true">LitRPG Raid Charity Auction Preview</div>
+                        <div class="attendee-badges"></div>
+                        <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                    </div>
+                    <div class="event gaming" data-event-id="sat-1130am-2">
+                        <div class="event-title" contenteditable="true">Murder Most Felt: A Puppet Murder Mystery Game</div>
+                        <div class="attendee-badges"></div>
+                        <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                    </div>
+                    <div class="event tv-show" data-event-id="sat-1130am-3">
+                        <div class="event-title" contenteditable="true">Psych: Mind over Magic</div>
+                        <div class="attendee-badges"></div>
+                        <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                    </div>
+                    <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
+                </div>
+                
+                <div class="time-slot">
+                    <div class="time-header">1:00 PM <span class="overlap-warning">⚠️ 3 OVERLAPPING</span></div>
+                    <div class="event writing" data-event-id="sat-1pm-1">
+                        <div class="event-title" contenteditable="true">Adventures of the Strange and Unusual</div>
+                        <div class="attendee-badges"></div>
+                        <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                    </div>
+                    <div class="event science-tech" data-event-id="sat-1pm-2">
+                        <div class="event-title" contenteditable="true">AuDHDND</div>
+                        <div class="attendee-badges"></div>
+                        <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                    </div>
+                    <div class="event gaming" data-event-id="sat-1pm-3">
+                        <div class="event-title" contenteditable="true">Scavenger Hunt Bingo</div>
+                        <div class="attendee-badges"></div>
+                        <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                    </div>
+                    <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
+                </div>
+                
+                <div class="time-slot">
+                    <div class="time-header">2:30 PM <span class="overlap-warning">⚠️ 3 OVERLAPPING</span></div>
+                    <div class="event gaming" data-event-id="sat-230pm-1">
+                        <div class="event-title" contenteditable="true">Classic Sci-Fi Fandom Feud</div>
+                        <div class="attendee-badges"></div>
+                        <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                    </div>
+                    <div class="event writing" data-event-id="sat-230pm-2">
+                        <div class="event-title" contenteditable="true">Magic Mechanics and Myth-Making: Writing Tips from Top Fantasy Authors</div>
+                        <div class="attendee-badges"></div>
+                        <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                    </div>
+                    <div class="event science-tech" data-event-id="sat-230pm-3">
+                        <div class="event-title" contenteditable="true">Neurodivergence & Space Science - Ground Support to Crew Selection</div>
+                        <div class="attendee-badges"></div>
+                        <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                    </div>
+                    <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
+                </div>
+                
+                <div class="time-slot">
+                    <div class="time-header">3:00 PM <span class="overlap-warning">⚠️ 2 OVERLAPPING</span></div>
+                    <div class="event combat" data-event-id="sat-3pm-1">
+                        <div class="event-title" contenteditable="true">Dragon's Cup: Knightly Mass Combat</div>
+                        <div class="attendee-badges"></div>
+                        <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                    </div>
+                    <div class="event cosplay" data-event-id="sat-3pm-2">
+                        <div class="event-title" contenteditable="true">Over30cosplay- For Cosplayers Aged 30 - 300</div>
+                        <div class="attendee-badges"></div>
+                        <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                    </div>
+                    <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
+                </div>
+                
+                <div class="time-slot">
+                    <div class="time-header">4:00 PM</div>
+                    <div class="event cosplay" data-event-id="sat-4pm-1">
+                        <div class="event-title" contenteditable="true">Anime/Animation Cosplay Contest</div>
+                        <div class="attendee-badges"></div>
+                        <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                    </div>
+                    <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
+                </div>
+                
+                <div class="time-slot">
+                    <div class="time-header">5:00 PM</div>
+                    <div class="event combat" data-event-id="sat-5pm-1">
+                        <div class="event-title" contenteditable="true">Dragon's Cup: Dragon Battles</div>
+                        <div class="attendee-badges"></div>
+                        <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                    </div>
+                    <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
+                </div>
+                
+                <div class="time-slot">
+                    <div class="time-header">5:30 PM <span class="overlap-warning">⚠️ 2 OVERLAPPING</span></div>
+                    <div class="event apocalypse" data-event-id="sat-530pm-1">
+                        <div class="event-title" contenteditable="true">Apocalypse POV: Survivors</div>
+                        <div class="attendee-badges"></div>
+                        <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                    </div>
+                    <div class="event party-show" data-event-id="sat-530pm-2">
+                        <div class="event-title" contenteditable="true">Very Random Encounters - LIVE!</div>
+                        <div class="attendee-badges"></div>
+                        <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                    </div>
+                    <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
+                </div>
+                
+                <div class="time-slot">
                     <div class="time-header">7:00 PM</div>
                     <div class="event special" data-event-id="sat-7pm-1">
-                        <div class="event-title" contenteditable="true">Dragon Con Night at the Georgia Aquarium **EXTRA FEE EVENT** $$$</div>
+                        <div class="event-title" contenteditable="true">Dragon Con Night at the Georgia Aquarium **EXTRA FEE EVENT** $$</div>
+                        <div class="attendee-badges"></div>
+                        <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                    </div>
+                    <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
+                </div>
+                
+                <div class="time-slot">
+                    <div class="time-header">7:30 PM</div>
+                    <div class="event cosplay" data-event-id="sat-730pm-1">
+                        <div class="event-title" contenteditable="true">The Cults of Dragon Con Costume Contest</div>
+                        <div class="attendee-badges"></div>
+                        <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                    </div>
+                    <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
+                </div>
+                
+                <div class="time-slot">
+                    <div class="time-header">8:30 PM</div>
+                    <div class="event gaming" data-event-id="sat-830pm-1">
+                        <div class="event-title" contenteditable="true">Delphic Oracle</div>
+                        <div class="attendee-badges"></div>
+                        <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                    </div>
+                    <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
+                </div>
+                
+                <div class="time-slot">
+                    <div class="time-header">10:00 PM <span class="overlap-warning">⚠️ 4 OVERLAPPING</span></div>
+                    <div class="event party-show" data-event-id="sat-10pm-1">
+                        <div class="event-title" contenteditable="true">Big Damn Game Show!</div>
+                        <div class="attendee-badges"></div>
+                        <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                    </div>
+                    <div class="event party-show" data-event-id="sat-10pm-2">
+                        <div class="event-title" contenteditable="true">Fantasy Dating Game: Will Our Characters Find a Match?</div>
+                        <div class="attendee-badges"></div>
+                        <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                    </div>
+                    <div class="event party-show" data-event-id="sat-10pm-3">
+                        <div class="event-title" contenteditable="true">Solve for X: Nerd Nite Dragon Con! (Mature Audience 18+)</div>
+                        <div class="attendee-badges"></div>
+                        <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                    </div>
+                    <div class="event writing" data-event-id="sat-10pm-4">
+                        <div class="event-title" contenteditable="true">Vampires vs. Demons: A Black Dagger Brotherhood Fan Panel</div>
                         <div class="attendee-badges"></div>
                         <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
                     </div>
@@ -912,7 +1095,16 @@
             
             <div class="day-section">
                 <h2>📅 Sunday, August 31</h2>
-                <!-- Key Sunday events -->
+                <div class="time-slot">
+                    <div class="time-header">12:00 AM (Midnight)</div>
+                    <div class="event party-show" data-event-id="sun-12am-1">
+                        <div class="event-title" contenteditable="true">Dragon Con Burlesque: A Glamour Geek Revue</div>
+                        <div class="attendee-badges"></div>
+                        <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                    </div>
+                    <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
+                </div>
+                
                 <div class="time-slot">
                     <div class="time-header">10:00 AM <span class="overlap-warning">⚠️ 3 OVERLAPPING</span></div>
                     <div class="event tv-show" data-event-id="sun-10am-1">
@@ -927,6 +1119,106 @@
                     </div>
                     <div class="event writing" data-event-id="sun-10am-3">
                         <div class="event-title" contenteditable="true">Military Veterans Who Write</div>
+                        <div class="attendee-badges"></div>
+                        <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                    </div>
+                    <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
+                </div>
+                
+                <div class="time-slot">
+                    <div class="time-header">11:30 AM <span class="overlap-warning">⚠️ 2 OVERLAPPING</span></div>
+                    <div class="event science-tech" data-event-id="sun-1130am-1">
+                        <div class="event-title" contenteditable="true">Gaming and Neurodiversity</div>
+                        <div class="attendee-badges"></div>
+                        <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                    </div>
+                    <div class="event litrpg" data-event-id="sun-1130am-2">
+                        <div class="event-title" contenteditable="true">How to Dungeon Crawl and Make It Fun</div>
+                        <div class="attendee-badges"></div>
+                        <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                    </div>
+                    <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
+                </div>
+                
+                <div class="time-slot">
+                    <div class="time-header">12:30 PM</div>
+                    <div class="event tv-show" data-event-id="sun-1230pm-1">
+                        <div class="event-title" contenteditable="true">Sailor Moon</div>
+                        <div class="attendee-badges"></div>
+                        <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                    </div>
+                    <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
+                </div>
+                
+                <div class="time-slot">
+                    <div class="time-header">1:00 PM</div>
+                    <div class="event litrpg" data-event-id="sun-1pm-1">
+                        <div class="event-title" contenteditable="true">Hi, I'm NOT Matt Dinniman...but I Write LitRPG, too!</div>
+                        <div class="attendee-badges"></div>
+                        <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                    </div>
+                    <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
+                </div>
+                
+                <div class="time-slot">
+                    <div class="time-header">2:30 PM <span class="overlap-warning">⚠️ 3 OVERLAPPING</span></div>
+                    <div class="event apocalypse" data-event-id="sun-230pm-1">
+                        <div class="event-title" contenteditable="true">Apocalypse POV: Creating and Ending the World</div>
+                        <div class="attendee-badges"></div>
+                        <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                    </div>
+                    <div class="event tv-show" data-event-id="sun-230pm-2">
+                        <div class="event-title" contenteditable="true">Psych: Solving Crimes Any Way You Can</div>
+                        <div class="attendee-badges"></div>
+                        <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                    </div>
+                    <div class="event writing" data-event-id="sun-230pm-3">
+                        <div class="event-title" contenteditable="true">THERE WILL BE DRAGONS!!!!!!!!!! Now and Forever</div>
+                        <div class="attendee-badges"></div>
+                        <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                    </div>
+                    <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
+                </div>
+                
+                <div class="time-slot">
+                    <div class="time-header">4:00 PM <span class="overlap-warning">⚠️ 2 OVERLAPPING</span></div>
+                    <div class="event writing" data-event-id="sun-4pm-1">
+                        <div class="event-title" contenteditable="true">Apocalyptic Fiction: What Are You Reading Now?</div>
+                        <div class="attendee-badges"></div>
+                        <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                    </div>
+                    <div class="event party-show" data-event-id="sun-4pm-2">
+                        <div class="event-title" contenteditable="true">Welcome to Fandom Face-Off: The Ultimate Gameshow of Bad Choices!</div>
+                        <div class="attendee-badges"></div>
+                        <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                    </div>
+                    <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
+                </div>
+                
+                <div class="time-slot">
+                    <div class="time-header">5:30 PM</div>
+                    <div class="event special" data-event-id="sun-530pm-1">
+                        <div class="event-title" contenteditable="true">Loyal Order of the Ribbon: Annual Hyatt Ribbon Drop!</div>
+                        <div class="attendee-badges"></div>
+                        <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                    </div>
+                    <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
+                </div>
+                
+                <div class="time-slot">
+                    <div class="time-header">7:00 PM</div>
+                    <div class="event litrpg" data-event-id="sun-7pm-1">
+                        <div class="event-title" contenteditable="true">LitRPG Raid Extravaganza! Scavenger Hunt and Silent Auction</div>
+                        <div class="attendee-badges"></div>
+                        <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                    </div>
+                    <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
+                </div>
+                
+                <div class="time-slot">
+                    <div class="time-header">10:00 PM</div>
+                    <div class="event party-show" data-event-id="sun-10pm-1">
+                        <div class="event-title" contenteditable="true">Cosplay Party Extravaganza: Unleash Your Inner Hero!</div>
                         <div class="attendee-badges"></div>
                         <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
                     </div>
