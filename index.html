@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dragon Con 2025 - Group Schedule Planner</title>
+    <title>Dragon Con 2024 - Group Schedule Planner</title>
     <style>
         @media print {
             body { margin: 0.5in; }
@@ -188,10 +188,33 @@
             transition: all 0.3s ease;
         }
         
+        .event-time {
+            display: inline-block;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+            margin-right: 10px;
+            margin-bottom: 5px;
+        }
+        
         .event-title {
             font-weight: 500;
             margin-bottom: 8px;
             padding-right: 60px;
+        }
+        
+        .overlapping-event {
+            border-right: 4px solid #ff6b6b;
+            background: repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 10px,
+                rgba(255, 107, 107, 0.05) 10px,
+                rgba(255, 107, 107, 0.05) 20px
+            );
         }
         
         .event[contenteditable="true"]:hover {
@@ -383,6 +406,50 @@
             background: #229954;
         }
         
+        .time-slot-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .delete-timeslot-btn {
+            background: #c0392b;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .delete-timeslot-btn:hover {
+            background: #a93226;
+        }
+        
+        .add-timeslot-btn {
+            background: #2980b9;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 15px 0;
+            font-size: 14px;
+            display: block;
+        }
+        
+        .add-timeslot-btn:hover {
+            background: #21618c;
+        }
+        
+        .time-input {
+            padding: 6px 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            width: 120px;
+        }
+        
         .conflict-summary {
             background: #fff3cd;
             border: 2px solid #ffc107;
@@ -403,7 +470,7 @@
     </style>
 </head>
 <body>
-    <h1>🐉 Dragon Con 2025 - Group Schedule Planner 🐉</h1>
+    <h1>🐉 Dragon Con 2024 - Group Schedule Planner 🐉</h1>
     
     <div class="attendee-manager no-print">
         <h3>👥 Group Members</h3>
@@ -434,6 +501,8 @@
             <li><strong>See Conflicts:</strong> When multiple people want different events at the same time, you'll see a conflict summary</li>
             <li><strong>Edit Events:</strong> Click on event titles to add notes like room numbers or meeting spots</li>
             <li><strong>Delete Events:</strong> Remove events no one is interested in with the red "Delete" button</li>
+            <li><strong>Add Time Slots:</strong> Click "+ Add Time Slot" to add custom times for meals, breaks, or meetups</li>
+            <li><strong>Delete Time Slots:</strong> Remove entire time blocks with the "🗑️ Delete Time Slot" button</li>
             <li><strong>Split the Party:</strong> Use the attendee badges to coordinate who goes where during overlaps</li>
         </ul>
     </div>
@@ -442,6 +511,7 @@
         <button onclick="window.print()">🖨️ Print Schedule</button>
         <button onclick="saveSchedule()">💾 Save Changes</button>
         <button onclick="showConflicts()">⚠️ Show All Conflicts</button>
+        <button onclick="addDaySection()">📅 Add New Day</button>
         <button onclick="resetSchedule()">🔄 Reset Original</button>
     </div>
     
@@ -649,6 +719,60 @@
             }
         }
         
+        // Delete entire time slot
+        function deleteTimeSlot(btn) {
+            if(confirm('Remove this entire time slot and all its events?')) {
+                const timeSlot = btn.closest('.time-slot');
+                // Remove event data for all events in this slot
+                timeSlot.querySelectorAll('.event').forEach(event => {
+                    const eventId = event.dataset.eventId;
+                    delete eventData[eventId];
+                });
+                timeSlot.remove();
+            }
+        }
+        
+        // Add new time slot
+        function addTimeSlot(btn) {
+            const daySection = btn.closest('.day-section');
+            const timeSlotId = 'slot-' + Date.now();
+            
+            const newTimeSlot = document.createElement('div');
+            newTimeSlot.className = 'time-slot';
+            newTimeSlot.innerHTML = `
+                <div class="time-header">
+                    <input type="text" class="time-input" placeholder="Enter time" value="12:00 PM" onblur="updateTimeHeader(this)">
+                </div>
+                <div class="event gaming" data-event-id="${timeSlotId}-event1">
+                    <span class="event-time">12:00 PM - 1:00 PM</span>
+                    <div class="event-title" contenteditable="true">New Event - Click to Edit</div>
+                    <div class="attendee-badges"></div>
+                    <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                </div>
+                <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
+                <div class="time-slot-controls no-print">
+                    <button class="delete-timeslot-btn" onclick="deleteTimeSlot(this)">🗑️ Delete Time Slot</button>
+                </div>
+            `;
+            
+            // Insert before the add time slot button
+            daySection.insertBefore(newTimeSlot, btn);
+            
+            // Update badges for the new event
+            updateEventBadges(timeSlotId + '-event1');
+            
+            // Focus the time input
+            newTimeSlot.querySelector('.time-input').focus();
+        }
+        
+        // Update time header when edited
+        function updateTimeHeader(input) {
+            const header = input.parentElement;
+            const existingSpans = header.querySelectorAll('.overlap-warning');
+            header.innerHTML = input.value;
+            existingSpans.forEach(span => header.appendChild(span));
+        }
+        
         // Add new event
         function addEvent(btn) {
             const eventId = 'event-' + Date.now();
@@ -656,6 +780,7 @@
             newEvent.className = 'event gaming';
             newEvent.dataset.eventId = eventId;
             newEvent.innerHTML = `
+                <span class="event-time">1:00 PM - 2:00 PM</span>
                 <div class="event-title" contenteditable="true">New Event - Click to Edit</div>
                 <div class="attendee-badges"></div>
                 <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
@@ -696,6 +821,23 @@
             });
         }
         
+        // Add new day section
+        function addDaySection() {
+            const container = document.getElementById('scheduleContainer');
+            const daySection = document.createElement('div');
+            daySection.className = 'day-section';
+            
+            const dayName = prompt('Enter day name (e.g., "Tuesday, September 2"):');
+            if (!dayName) return;
+            
+            daySection.innerHTML = `
+                <h2>📅 ${dayName}</h2>
+                <button class="add-timeslot-btn no-print" onclick="addTimeSlot(this)">+ Add Time Slot</button>
+            `;
+            
+            container.appendChild(daySection);
+        }
+        
         // Generate schedule HTML
         function generateSchedule() {
             const container = document.getElementById('scheduleContainer');
@@ -710,7 +852,11 @@
                         <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
                     </div>
                     <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
+                    <div class="time-slot-controls no-print">
+                        <button class="delete-timeslot-btn" onclick="deleteTimeSlot(this)">🗑️ Delete Time Slot</button>
+                    </div>
                 </div>
+                <button class="add-timeslot-btn no-print" onclick="addTimeSlot(this)">+ Add Time Slot</button>
             </div>
             
             <div class="day-section">
@@ -723,7 +869,11 @@
                         <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
                     </div>
                     <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
+                    <div class="time-slot-controls no-print">
+                        <button class="delete-timeslot-btn" onclick="deleteTimeSlot(this)">🗑️ Delete Time Slot</button>
+                    </div>
                 </div>
+                <button class="add-timeslot-btn no-print" onclick="addTimeSlot(this)">+ Add Time Slot</button>
                 
                 <div class="time-slot">
                     <div class="time-header">2:30 PM <span class="overlap-warning">⚠️ 2 OVERLAPPING</span></div>
@@ -738,7 +888,11 @@
                         <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
                     </div>
                     <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
+                    <div class="time-slot-controls no-print">
+                        <button class="delete-timeslot-btn" onclick="deleteTimeSlot(this)">🗑️ Delete Time Slot</button>
+                    </div>
                 </div>
+                <button class="add-timeslot-btn no-print" onclick="addTimeSlot(this)">+ Add Time Slot</button>
                 
                 <div class="time-slot">
                     <div class="time-header">3:00 PM</div>
@@ -748,7 +902,11 @@
                         <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
                     </div>
                     <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
+                    <div class="time-slot-controls no-print">
+                        <button class="delete-timeslot-btn" onclick="deleteTimeSlot(this)">🗑️ Delete Time Slot</button>
+                    </div>
                 </div>
+                <button class="add-timeslot-btn no-print" onclick="addTimeSlot(this)">+ Add Time Slot</button>
                 
                 <div class="time-slot">
                     <div class="time-header">4:00 PM <span class="overlap-warning">⚠️ 3 OVERLAPPING</span></div>
@@ -768,7 +926,11 @@
                         <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
                     </div>
                     <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
+                    <div class="time-slot-controls no-print">
+                        <button class="delete-timeslot-btn" onclick="deleteTimeSlot(this)">🗑️ Delete Time Slot</button>
+                    </div>
                 </div>
+                <button class="add-timeslot-btn no-print" onclick="addTimeSlot(this)">+ Add Time Slot</button>
                 
                 <div class="time-slot">
                     <div class="time-header">5:30 PM <span class="overlap-warning">⚠️ 3 OVERLAPPING</span></div>
@@ -883,20 +1045,102 @@
                         <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
                     </div>
                     <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
+                    <div class="time-slot-controls no-print">
+                        <button class="delete-timeslot-btn" onclick="deleteTimeSlot(this)">🗑️ Delete Time Slot</button>
+                    </div>
                 </div>
+                <button class="add-timeslot-btn no-print" onclick="addTimeSlot(this)">+ Add Time Slot</button>
             </div>
             
             <div class="day-section">
                 <h2>📅 Saturday, August 30</h2>
+                <button class="add-timeslot-btn no-print" onclick="addTimeSlot(this)">+ Add Time Slot</button>
                 <div class="time-slot">
                     <div class="time-header">8:30 AM</div>
                     <div class="event special" data-event-id="sat-830am-1">
+                        <span class="event-time">8:30 AM - 9:30 AM</span>
                         <div class="event-title" contenteditable="true">Dragon Con Parade Spectacular: The Ultimate Fan March!</div>
                         <div class="attendee-badges"></div>
                         <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
                     </div>
                     <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
+                    <div class="time-slot-controls no-print">
+                        <button class="delete-timeslot-btn" onclick="deleteTimeSlot(this)">🗑️ Delete Time Slot</button>
+                    </div>
                 </div>
+                <button class="add-timeslot-btn no-print" onclick="addTimeSlot(this)">+ Add Time Slot</button>
+                
+                <div class="time-slot">
+                    <div class="time-header">9:00 AM</div>
+                    <div class="event science-tech" data-event-id="sat-9am-1">
+                        <span class="event-time">9:00 AM - 10:15 AM</span>
+                        <div class="event-title" contenteditable="true">Space Combat in Movies, Books and Games: Getting It Not Wrong, NSDM Seminar</div>
+                        <div class="attendee-badges"></div>
+                        <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                    </div>
+                    <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
+                    <div class="time-slot-controls no-print">
+                        <button class="delete-timeslot-btn" onclick="deleteTimeSlot(this)">🗑️ Delete Time Slot</button>
+                    </div>
+                </div>
+                <button class="add-timeslot-btn no-print" onclick="addTimeSlot(this)">+ Add Time Slot</button>
+                
+                <div class="time-slot">
+                    <div class="time-header">10:00 AM</div>
+                    <div class="event special" data-event-id="sat-10am-1">
+                        <span class="event-time">10:00 AM - 12:00 PM</span>
+                        <div class="event-title" contenteditable="true">🎉 25th Annual Dragon Con Parade!</div>
+                        <div class="attendee-badges"></div>
+                        <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                    </div>
+                    <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
+                    <div class="time-slot-controls no-print">
+                        <button class="delete-timeslot-btn" onclick="deleteTimeSlot(this)">🗑️ Delete Time Slot</button>
+                    </div>
+                </div>
+                <button class="add-timeslot-btn no-print" onclick="addTimeSlot(this)">+ Add Time Slot</button>
+                
+                <div class="time-slot">
+                    <div class="time-header">10:30 AM</div>
+                    <div class="event combat overlapping-event" data-event-id="sat-1030am-1">
+                        <span class="event-time">10:30 AM - 11:45 AM</span>
+                        <div class="event-title" contenteditable="true">Dragon's Cup: The Knightly Art of Single Combat</div>
+                        <div class="attendee-badges"></div>
+                        <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                    </div>
+                    <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
+                    <div class="time-slot-controls no-print">
+                        <button class="delete-timeslot-btn" onclick="deleteTimeSlot(this)">🗑️ Delete Time Slot</button>
+                    </div>
+                </div>
+                <button class="add-timeslot-btn no-print" onclick="addTimeSlot(this)">+ Add Time Slot</button>
+                
+                <div class="time-slot">
+                    <div class="time-header">11:30 AM <span class="overlap-warning">⚠️ 3 OVERLAPPING</span></div>
+                    <div class="event litrpg overlapping-event" data-event-id="sat-1130am-1">
+                        <span class="event-time">11:30 AM - 12:45 PM</span>
+                        <div class="event-title" contenteditable="true">LitRPG Raid Charity Auction Preview</div>
+                        <div class="attendee-badges"></div>
+                        <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                    </div>
+                    <div class="event gaming overlapping-event" data-event-id="sat-1130am-2">
+                        <span class="event-time">11:30 AM - 12:45 PM</span>
+                        <div class="event-title" contenteditable="true">Murder Most Felt: A Puppet Murder Mystery Game</div>
+                        <div class="attendee-badges"></div>
+                        <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                    </div>
+                    <div class="event tv-show overlapping-event" data-event-id="sat-1130am-3">
+                        <span class="event-time">11:30 AM - 12:45 PM</span>
+                        <div class="event-title" contenteditable="true">Psych: Mind over Magic</div>
+                        <div class="attendee-badges"></div>
+                        <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                    </div>
+                    <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
+                    <div class="time-slot-controls no-print">
+                        <button class="delete-timeslot-btn" onclick="deleteTimeSlot(this)">🗑️ Delete Time Slot</button>
+                    </div>
+                </div>
+                <button class="add-timeslot-btn no-print" onclick="addTimeSlot(this)">+ Add Time Slot</button>
                 
                 <div class="time-slot">
                     <div class="time-header">9:00 AM</div>
@@ -1229,6 +1473,7 @@
             
             <div class="day-section">
                 <h2>📅 Monday, September 1</h2>
+                <button class="add-timeslot-btn no-print" onclick="addTimeSlot(this)">+ Add Time Slot</button>
                 <div class="time-slot">
                     <div class="time-header">10:00 AM</div>
                     <div class="event litrpg" data-event-id="mon-10am-1">
@@ -1237,7 +1482,11 @@
                         <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
                     </div>
                     <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
+                    <div class="time-slot-controls no-print">
+                        <button class="delete-timeslot-btn" onclick="deleteTimeSlot(this)">🗑️ Delete Time Slot</button>
+                    </div>
                 </div>
+                <button class="add-timeslot-btn no-print" onclick="addTimeSlot(this)">+ Add Time Slot</button>
             </div>
             `;
         }
