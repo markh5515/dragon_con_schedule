@@ -198,6 +198,18 @@
             font-weight: bold;
             margin-right: 10px;
             margin-bottom: 5px;
+            cursor: text;
+            min-width: 120px;
+        }
+        
+        .event-time[contenteditable="true"]:focus {
+            outline: 2px solid #667eea;
+            outline-offset: 1px;
+            background: rgba(0, 0, 0, 0.95);
+        }
+        
+        .event-time[contenteditable="true"]:hover {
+            background: rgba(0, 0, 0, 0.95);
         }
         
         .event-title {
@@ -500,6 +512,7 @@
             <li><strong>Assign Attendees:</strong> Click on attendee badges under each event to toggle who's interested</li>
             <li><strong>See Conflicts:</strong> When multiple people want different events at the same time, you'll see a conflict summary</li>
             <li><strong>Edit Events:</strong> Click on event titles to add notes like room numbers or meeting spots</li>
+            <li><strong>Edit Times:</strong> Click on the time badges (black boxes) to change event start/end times</li>
             <li><strong>Delete Events:</strong> Remove events no one is interested in with the red "Delete" button</li>
             <li><strong>Add Time Slots:</strong> Click "+ Add Time Slot" to add custom times for meals, breaks, or meetups</li>
             <li><strong>Delete Time Slots:</strong> Remove entire time blocks with the "🗑️ Delete Time Slot" button</li>
@@ -744,7 +757,7 @@
                     <input type="text" class="time-input" placeholder="Enter time" value="12:00 PM" onblur="updateTimeHeader(this)">
                 </div>
                 <div class="event gaming" data-event-id="${timeSlotId}-event1">
-                    <span class="event-time">12:00 PM - 1:00 PM</span>
+                    <span class="event-time" contenteditable="true">12:00 PM - 1:00 PM</span>
                     <div class="event-title" contenteditable="true">New Event - Click to Edit</div>
                     <div class="attendee-badges"></div>
                     <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
@@ -776,11 +789,15 @@
         // Add new event
         function addEvent(btn) {
             const eventId = 'event-' + Date.now();
+            const timeSlot = btn.closest('.time-slot');
+            const timeHeader = timeSlot.querySelector('.time-header').textContent.trim();
+            const baseTime = timeHeader.split(' ')[0]; // Get just the time part
+            
             const newEvent = document.createElement('div');
             newEvent.className = 'event gaming';
             newEvent.dataset.eventId = eventId;
             newEvent.innerHTML = `
-                <span class="event-time">1:00 PM - 2:00 PM</span>
+                <span class="event-time" contenteditable="true">${baseTime} - End Time</span>
                 <div class="event-title" contenteditable="true">New Event - Click to Edit</div>
                 <div class="attendee-badges"></div>
                 <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
