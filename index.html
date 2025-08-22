@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dragon Con 2025 - Group Schedule Planner</title>
+    <!-- Firebase App (the core Firebase SDK) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <!-- Firebase Realtime Database -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     <style>
         @media print {
             body { margin: 0.5in; }
@@ -582,6 +586,21 @@
         // Store attendees
         let attendees = [];
         let eventData = {};
+
+        // Firebase config (replace with your own project config if needed)
+        const firebaseConfig = {
+            apiKey: "AIzaSyD-EXAMPLEKEY",
+            authDomain: "dragoncon-schedule.firebaseapp.com",
+            databaseURL: "https://dragoncon-schedule-default-rtdb.firebaseio.com",
+            projectId: "dragoncon-schedule",
+            storageBucket: "dragoncon-schedule.appspot.com",
+            messagingSenderId: "1234567890",
+            appId: "1:1234567890:web:abcdef123456"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        // Helper: get group key (for now, use a fixed key for all users)
+        const GROUP_KEY = 'default-group';
         
         // Initialize default attendees
         function initializeAttendees() {
@@ -814,15 +833,21 @@
                 eventData: eventData,
                 scheduleHTML: document.getElementById('scheduleContainer').innerHTML
             };
-            localStorage.setItem('dragonConGroupSchedule', JSON.stringify(data));
-            alert('Schedule saved! Your changes will persist in this browser.');
+            db.ref('schedules/' + GROUP_KEY).set(data, (err) => {
+                if (err) {
+                    alert('Error saving schedule: ' + err);
+                } else {
+                    alert('Schedule saved! Everyone will see your changes.');
+                }
+            });
         }
         
         // Reset schedule
         function resetSchedule() {
             if(confirm('Reset to original schedule? All changes will be lost.')) {
-                localStorage.removeItem('dragonConGroupSchedule');
-                location.reload();
+                db.ref('schedules/' + GROUP_KEY).remove(() => {
+                    location.reload();
+                });
             }
         }
         
@@ -1510,19 +1535,21 @@
         
         // Initialize on load
         window.onload = function() {
-            const saved = localStorage.getItem('dragonConGroupSchedule');
-            if (saved) {
-                const data = JSON.parse(saved);
-                attendees = data.attendees || [];
-                eventData = data.eventData || {};
-                document.getElementById('scheduleContainer').innerHTML = data.scheduleHTML || '';
-                updateAttendeeList();
-                updateAllEventBadges();
-            } else {
-                initializeAttendees();
-                generateSchedule();
-                updateAllEventBadges();
-            }
+            // Load schedule from Firebase
+            db.ref('schedules/' + GROUP_KEY).on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    attendees = data.attendees || [];
+                    eventData = data.eventData || {};
+                    document.getElementById('scheduleContainer').innerHTML = data.scheduleHTML || '';
+                    updateAttendeeList();
+                    updateAllEventBadges();
+                } else {
+                    initializeAttendees();
+                    generateSchedule();
+                    updateAllEventBadges();
+                }
+            });
         }
     </script>
 </body>
