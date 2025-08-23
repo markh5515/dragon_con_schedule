@@ -1545,15 +1545,69 @@
                     updateAttendeeList();
                     updateAllEventBadges();
                 } else {
-                    // If no data, generate and save default schedule to Firebase
+                    // If no data, set up default attendees and schedule
+                    attendees = [];
+                    eventData = {};
                     initializeAttendees();
-                    generateSchedule();
+                    // Generate default schedule HTML
+                    const container = document.getElementById('scheduleContainer');
+                    container.innerHTML = `<div class="day-section">
+                        <h2>📅 Thursday, August 28</h2>
+                        <div class="time-slot">
+                            <div class="time-header">8:30 PM</div>
+                            <div class="event cosplay" data-event-id="thu-830pm-1">
+                                <div class="event-title" contenteditable="true">Page to Stage Cosplay and Costume Contest</div>
+                                <div class="attendee-badges"></div>
+                                <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                            </div>
+                            <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
+                            <div class="time-slot-controls no-print">
+                                <button class="delete-timeslot-btn" onclick="deleteTimeSlot(this)">🗑️ Delete Time Slot</button>
+                            </div>
+                        </div>
+                        <button class="add-timeslot-btn no-print" onclick="addTimeSlot(this)">+ Add Time Slot</button>
+                    </div>
+                    <div class="day-section">
+                        <h2>📅 Friday, August 29</h2>
+                        <div class="time-slot">
+                            <div class="time-header">1:00 PM</div>
+                            <div class="event science-tech" data-event-id="fri-1pm-1">
+                                <div class="event-title" contenteditable="true">Building Your Own JARVIS: AI across Any Device</div>
+                                <div class="attendee-badges"></div>
+                                <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                            </div>
+                            <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
+                            <div class="time-slot-controls no-print">
+                                <button class="delete-timeslot-btn" onclick="deleteTimeSlot(this)">🗑️ Delete Time Slot</button>
+                            </div>
+                        </div>
+                        <button class="add-timeslot-btn no-print" onclick="addTimeSlot(this)">+ Add Time Slot</button>
+                        <div class="time-slot">
+                            <div class="time-header">2:30 PM <span class="overlap-warning">⚠️ 2 OVERLAPPING</span></div>
+                            <div class="event apocalypse" data-event-id="fri-230pm-1">
+                                <div class="event-title" contenteditable="true">Apocalypse POV: How It Happened</div>
+                                <div class="attendee-badges"></div>
+                                <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                            </div>
+                            <div class="event writing" data-event-id="fri-230pm-2">
+                                <div class="event-title" contenteditable="true">Military Sci-Fi Writers & Creators - Media Edition</div>
+                                <div class="attendee-badges"></div>
+                                <button class="delete-btn" onclick="deleteEvent(this)">Delete</button>
+                            </div>
+                            <button class="add-event-btn no-print" onclick="addEvent(this)">+ Add Event</button>
+                            <div class="time-slot-controls no-print">
+                                <button class="delete-timeslot-btn" onclick="deleteTimeSlot(this)">🗑️ Delete Time Slot</button>
+                            </div>
+                        </div>
+                        <button class="add-timeslot-btn no-print" onclick="addTimeSlot(this)">+ Add Time Slot</button>
+                    </div>`;
+                    updateAttendeeList();
                     updateAllEventBadges();
                     // Save default schedule to Firebase
                     const defaultData = {
                         attendees: attendees,
                         eventData: eventData,
-                        scheduleHTML: document.getElementById('scheduleContainer').innerHTML
+                        scheduleHTML: container.innerHTML
                     };
                     db.ref('schedules/' + GROUP_KEY).set(defaultData);
                 }
