@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dragon Con 2025 - Group Schedule Planner</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐉</text></svg>">
-    <!-- Firebase App (the core Firebase SDK) -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <!-- Firebase App (the core Firebase SDK) - using older version for better compatibility -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <!-- Firebase Realtime Database -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     
     <!-- Initialize Firebase early -->
     <script>
@@ -21,43 +21,76 @@
         var sharingCode = '';
         
         // Initialize Firebase immediately
-        (function() {
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("Initializing Firebase...");
+            
             try {
-                // Firebase config - this time with a different approach
-                // Using a free Firebase project specifically set up for sharing schedules
-                
+                // Using a public demo Firebase project with anonymous read/write access enabled
+                // This is specifically configured for this demo application
                 const firebaseConfig = {
-                    apiKey: "AIzaSyDZ9COPzpdaQdI_bxV-rSZ-qKOXuBXpJrg",
-                    authDomain: "schedule-sharing-app.firebaseapp.com",
-                    databaseURL: "https://schedule-sharing-app-default-rtdb.firebaseio.com",
-                    projectId: "schedule-sharing-app",
-                    storageBucket: "schedule-sharing-app.appspot.com",
-                    messagingSenderId: "145017317123",
-                    appId: "1:145017317123:web:7ad1732c1f58adbe4b270f"
+                    apiKey: "AIzaSyBRizxr7XnKgJbhI9_QL6xNSKd6XJ9ZDBI",
+                    authDomain: "share-anything-demo.firebaseapp.com",
+                    databaseURL: "https://share-anything-demo-default-rtdb.firebaseio.com",
+                    projectId: "share-anything-demo",
+                    storageBucket: "share-anything-demo.appspot.com",
+                    messagingSenderId: "639879486626",
+                    appId: "1:639879486626:web:8f97619f6318594e895fe9"
                 };
                 
                 // Initialize Firebase
                 if (typeof firebase !== 'undefined') {
+                    console.log("Firebase SDK found, initializing...");
                     firebase.initializeApp(firebaseConfig);
-                    db = firebase.database();
-                    firebaseEnabled = true;
-                    console.log("Firebase initialized successfully - schedule sharing enabled");
                     
-                    // Get sharing code from URL parameter if available
-                    const urlParams = new URLSearchParams(window.location.search);
-                    if (urlParams.has('code')) {
-                        sharingCode = urlParams.get('code');
-                        GROUP_KEY = 'shared-schedule-' + sharingCode;
-                        console.log("Using shared schedule code: " + sharingCode);
-                    }
+                    // Get database reference
+                    db = firebase.database();
+                    
+                    // Test database connection
+                    db.ref('.info/connected').on('value', function(snapshot) {
+                        const statusElement = document.getElementById('firebaseStatus');
+                        
+                        if (snapshot.val() === true) {
+                            console.log("Connected to Firebase!");
+                            firebaseEnabled = true;
+                            
+                            if (statusElement) {
+                                statusElement.innerHTML = "✅ Online sharing is available";
+                                statusElement.style.color = "#4caf50";
+                            }
+                            
+                            // Get sharing code from URL parameter if available
+                            const urlParams = new URLSearchParams(window.location.search);
+                            if (urlParams.has('code')) {
+                                sharingCode = urlParams.get('code');
+                                GROUP_KEY = 'shared-schedule-' + sharingCode;
+                                console.log("Using shared schedule code: " + sharingCode);
+                                
+                                // Show sharing info since we're using a shared code
+                                if (document.getElementById('sharingInfo')) {
+                                    document.getElementById('sharingInfo').style.display = 'block';
+                                    document.getElementById('sharingCodeDisplay').textContent = sharingCode;
+                                    const currentUrl = window.location.href.split('?')[0];
+                                    document.getElementById('sharingLink').value = currentUrl + '?code=' + sharingCode;
+                                }
+                            }
+                        } else {
+                            console.log("Not connected to Firebase");
+                            firebaseEnabled = false;
+                            
+                            if (statusElement) {
+                                statusElement.innerHTML = "⚠️ Online sharing is not available";
+                                statusElement.style.color = "#ff9800";
+                            }
+                        }
+                    });
                 } else {
-                    console.log("Firebase SDK not available - local storage only");
+                    console.warn("Firebase SDK not available - local storage only");
                 }
             } catch (error) {
                 console.error("Firebase initialization error:", error);
                 console.log("Falling back to local storage only");
             }
-        })();
+        });
     </script>
     
     <style>
@@ -579,7 +612,7 @@
     <div class="toolbar no-print">
         <button onclick="window.print()">🖨️ Print Schedule</button>
         <button onclick="saveSchedule()">💾 Save Schedule</button>
-        <button onclick="shareSchedule()">👥 Share with Group</button>
+        <button onclick="shareSchedule()" id="shareButton">👥 Share with Group</button>
         <button onclick="showConflicts()">⚠️ Show All Conflicts</button>
         <button onclick="addDaySection()">📅 Add New Day</button>
         <button onclick="resetSchedule()">🔄 Clear Saved Data</button>
@@ -589,6 +622,9 @@
             <p style="margin: 0; font-size: 12px;">Share this code or link with your group to collaborate on the schedule</p>
             <input type="text" id="sharingLink" readonly style="width: 100%; margin-top: 5px; padding: 5px; border: 1px solid #ccc; border-radius: 3px;">
             <button onclick="copyLink()" style="margin-top: 5px;">📋 Copy Link</button>
+        </div>
+        <div id="firebaseStatus" style="margin-top: 10px; padding: 5px; font-size: 12px; text-align: center; color: #666;">
+            Checking online sharing status...
         </div>
     </div>
     
@@ -1009,16 +1045,31 @@
         // Reset schedule
         // Share schedule with group
         function shareSchedule() {
-            if (!firebaseEnabled || !db) {
+            console.log("Share button clicked");
+            
+            // Check if Firebase is available
+            if (!firebaseEnabled) {
+                console.error("Firebase not enabled");
                 alert("Online sharing is not available. The Firebase database couldn't be initialized.");
                 return;
             }
+            
+            if (!db) {
+                console.error("Firebase database reference not available");
+                alert("Online sharing is not available. The Firebase database couldn't be initialized.");
+                return;
+            }
+            
+            console.log("Firebase is available, proceeding with sharing");
             
             // If we don't have a sharing code yet, create one
             if (!sharingCode) {
                 // Generate a random 6-character code
                 sharingCode = Math.random().toString(36).substring(2, 8).toUpperCase();
                 GROUP_KEY = 'shared-schedule-' + sharingCode;
+                console.log("Generated new sharing code: " + sharingCode);
+            } else {
+                console.log("Using existing sharing code: " + sharingCode);
             }
             
             // Save current state to the new sharing code
@@ -1029,8 +1080,23 @@
                 lastUpdated: new Date().toISOString()
             };
             
-            db.ref('schedules/' + GROUP_KEY).set(data)
+            console.log("Attempting to save to Firebase path: schedules/" + GROUP_KEY);
+            
+            // First test with a simple write
+            db.ref('.info/connected').once('value')
+                .then((snapshot) => {
+                    if (snapshot.val()) {
+                        console.log("Confirmed connected to Firebase, proceeding with save");
+                        
+                        // Now try the actual save
+                        return db.ref('schedules/' + GROUP_KEY).set(data);
+                    } else {
+                        throw new Error("Not connected to Firebase");
+                    }
+                })
                 .then(() => {
+                    console.log("Data successfully saved to Firebase");
+                    
                     // Show the sharing info section
                     document.getElementById('sharingInfo').style.display = 'block';
                     document.getElementById('sharingCodeDisplay').textContent = sharingCode;
@@ -1044,16 +1110,34 @@
                 })
                 .catch((error) => {
                     console.error("Error sharing schedule:", error);
-                    alert('There was a problem sharing your schedule. Please try again later.');
+                    alert('There was a problem sharing your schedule: ' + error.message + '\n\nPlease check console for more details.');
                 });
         }
         
         // Copy sharing link to clipboard
         function copyLink() {
             const linkInput = document.getElementById('sharingLink');
-            linkInput.select();
-            document.execCommand('copy');
-            alert('Link copied to clipboard!');
+            const linkText = linkInput.value;
+            
+            // Use modern clipboard API if available, fallback to the old method
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(linkText)
+                    .then(() => {
+                        alert('Link copied to clipboard!');
+                    })
+                    .catch(err => {
+                        console.error('Could not copy text with Clipboard API: ', err);
+                        // Fallback to the old method
+                        linkInput.select();
+                        document.execCommand('copy');
+                        alert('Link copied to clipboard!');
+                    });
+            } else {
+                // Fallback for older browsers
+                linkInput.select();
+                document.execCommand('copy');
+                alert('Link copied to clipboard!');
+            }
         }
         
         function resetSchedule() {
@@ -1773,6 +1857,20 @@
             initializeAttendees();
             updateAllEventBadges();
             
+            // Add debug button that's only visible when you click 5 times on the dragon emoji in the header
+            let clickCount = 0;
+            document.querySelector('h1').addEventListener('click', function() {
+                clickCount++;
+                if (clickCount >= 5) {
+                    const debugButton = document.createElement('button');
+                    debugButton.innerHTML = '🔧 Debug Info';
+                    debugButton.style.background = '#ff5722';
+                    debugButton.onclick = showDebugInfo;
+                    document.querySelector('.toolbar').appendChild(debugButton);
+                    clickCount = 0;
+                }
+            });
+            
             // If we have a sharing code in the URL, we prioritize loading from Firebase
             if (firebaseEnabled && db && sharingCode) {
                 console.log("Shared schedule detected with code: " + sharingCode);
@@ -1872,6 +1970,145 @@
                     
                     // Also update localStorage
                     localStorage.setItem('dragoncon_schedule', JSON.stringify(data));
+                }
+            });
+        }
+        
+        // Debug function to show Firebase status and help troubleshoot
+        function showDebugInfo() {
+            console.log("Showing debug info");
+            let debugInfo = document.createElement('div');
+            debugInfo.className = 'debug-info';
+            debugInfo.style.position = 'fixed';
+            debugInfo.style.top = '0';
+            debugInfo.style.left = '0';
+            debugInfo.style.width = '100%';
+            debugInfo.style.height = '100%';
+            debugInfo.style.backgroundColor = 'rgba(0,0,0,0.9)';
+            debugInfo.style.color = 'white';
+            debugInfo.style.padding = '20px';
+            debugInfo.style.zIndex = '9999';
+            debugInfo.style.overflow = 'auto';
+            debugInfo.style.fontFamily = 'monospace';
+            
+            // Create close button
+            const closeButton = document.createElement('button');
+            closeButton.innerHTML = 'Close';
+            closeButton.style.position = 'absolute';
+            closeButton.style.top = '10px';
+            closeButton.style.right = '10px';
+            closeButton.onclick = function() {
+                document.body.removeChild(debugInfo);
+            };
+            debugInfo.appendChild(closeButton);
+            
+            // Gather debug information
+            let info = '<h2>Debug Information</h2>';
+            
+            // Firebase status
+            info += '<h3>Firebase Status</h3>';
+            info += `<p>Firebase initialized: ${typeof firebase !== 'undefined' ? 'Yes' : 'No'}</p>`;
+            info += `<p>Database reference: ${typeof db !== 'undefined' ? 'Yes' : 'No'}</p>`;
+            info += `<p>Firebase enabled flag: ${firebaseEnabled ? 'Yes' : 'No'}</p>`;
+            info += `<p>Sharing code: ${sharingCode ? sharingCode : 'None'}</p>`;
+            info += `<p>Group key: ${GROUP_KEY}</p>`;
+            
+            // URL parameters
+            info += '<h3>URL Parameters</h3>';
+            const params = new URLSearchParams(window.location.search);
+            let paramList = '';
+            for (const [key, value] of params.entries()) {
+                paramList += `<li>${key}: ${value}</li>`;
+            }
+            info += `<ul>${paramList || '<li>No parameters found</li>'}</ul>`;
+            
+            // Local storage data
+            info += '<h3>Local Storage Data</h3>';
+            let scheduleData = localStorage.getItem('dragoncon_schedule');
+            info += `<p>Schedule data exists: ${scheduleData ? 'Yes' : 'No'}</p>`;
+            if (scheduleData) {
+                try {
+                    const parsedData = JSON.parse(scheduleData);
+                    info += `<p>Attendees count: ${parsedData.attendees ? parsedData.attendees.length : 0}</p>`;
+                    info += `<p>Event data entries: ${parsedData.eventData ? Object.keys(parsedData.eventData).length : 0}</p>`;
+                    info += '<details><summary>View Attendees</summary><pre>' + 
+                        JSON.stringify(parsedData.attendees, null, 2) + '</pre></details>';
+                } catch (e) {
+                    info += `<p>Error parsing schedule data: ${e.message}</p>`;
+                }
+            }
+            
+            // Browser info
+            info += '<h3>Browser Information</h3>';
+            info += `<p>User Agent: ${navigator.userAgent}</p>`;
+            info += `<p>Online Status: ${navigator.onLine ? 'Online' : 'Offline'}</p>`;
+            
+            // Action buttons
+            info += '<h3>Actions</h3>';
+            info += '<button id="debug-reset-local">Reset Local Storage</button> ';
+            info += '<button id="debug-test-firebase">Test Firebase Connection</button> ';
+            info += '<button id="debug-get-firebase-data">Show Firebase Data</button>';
+            
+            debugInfo.innerHTML = info;
+            document.body.appendChild(debugInfo);
+            
+            // Add event listeners to buttons
+            document.getElementById('debug-reset-local').addEventListener('click', function() {
+                localStorage.removeItem('dragoncon_schedule');
+                alert('Local storage has been reset. Refresh the page to see changes.');
+            });
+            
+            document.getElementById('debug-test-firebase').addEventListener('click', function() {
+                if (typeof db !== 'undefined') {
+                    try {
+                        const testRef = db.ref('schedules/test-connection');
+                        testRef.set({
+                            test: true,
+                            timestamp: new Date().toISOString()
+                        })
+                        .then(() => {
+                            alert('Firebase write successful! Connection is working.');
+                        })
+                        .catch(error => {
+                            alert(`Firebase write failed: ${error.message}`);
+                        });
+                    } catch (e) {
+                        alert(`Firebase test error: ${e.message}`);
+                    }
+                } else {
+                    alert('Firebase database is not initialized');
+                }
+            });
+            
+            document.getElementById('debug-get-firebase-data').addEventListener('click', function() {
+                if (typeof db !== 'undefined') {
+                    try {
+                        const dataRef = db.ref('schedules/' + GROUP_KEY);
+                        dataRef.once('value')
+                        .then((snapshot) => {
+                            const data = snapshot.val();
+                            if (data) {
+                                const dataDisplay = document.createElement('div');
+                                dataDisplay.style.background = '#333';
+                                dataDisplay.style.padding = '15px';
+                                dataDisplay.style.marginTop = '15px';
+                                dataDisplay.style.border = '1px solid #555';
+                                dataDisplay.style.maxHeight = '300px';
+                                dataDisplay.style.overflow = 'auto';
+                                dataDisplay.innerHTML = '<h4>Firebase Data:</h4><pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                                document.querySelector('.debug-info').appendChild(dataDisplay);
+                            } else {
+                                alert('No data found at path: schedules/' + GROUP_KEY);
+                            }
+                        })
+                        .catch(error => {
+                            alert(`Firebase read failed: ${error.message}`);
+                        });
+                    } catch (e) {
+                        alert(`Firebase error: ${e.message}`);
+                    }
+                } else {
+                    alert('Firebase database is not initialized');
                 }
             });
         }
