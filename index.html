@@ -4,10 +4,48 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dragon Con 2025 - Group Schedule Planner</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐉</text></svg>">
     <!-- Firebase App (the core Firebase SDK) -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <!-- Firebase Realtime Database -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    
+    <!-- Initialize Firebase early -->
+    <script>
+        // Global variables accessible to all scripts
+        var attendees = [];
+        var eventData = {};
+        var db = null;
+        var GROUP_KEY = 'default-group';
+        
+        // Initialize Firebase immediately
+        (function() {
+            try {
+                // Firebase config
+                const firebaseConfig = {
+                    apiKey: "AIzaSyB3LEuqRzxF0tl0-loJmX-2_EJ9bmmBD1k",
+                    authDomain: "dragoncon-schedule.firebaseapp.com",
+                    databaseURL: "https://dragoncon-schedule-default-rtdb.firebaseio.com",
+                    projectId: "dragoncon-schedule",
+                    storageBucket: "dragoncon-schedule.appspot.com",
+                    messagingSenderId: "679809817125",
+                    appId: "1:679809817125:web:e31962c3f7cff12f9ee4a0"
+                };
+                
+                // Initialize Firebase
+                if (typeof firebase !== 'undefined') {
+                    firebase.initializeApp(firebaseConfig);
+                    db = firebase.database();
+                    console.log("Firebase initialized successfully");
+                } else {
+                    console.error("Firebase SDK not available");
+                }
+            } catch (error) {
+                console.error("Firebase initialization error:", error);
+            }
+        })();
+    </script>
+    
     <style>
         @media print {
             body { margin: 0.5in; }
@@ -637,32 +675,8 @@
             }
         }
         // Store attendees
-        let attendees = [];
-        let eventData = {};
-
-        // Firebase config
-        // Note: These are placeholders. If you have actual Firebase credentials, replace these.
-        const firebaseConfig = {
-            apiKey: "AIzaSyB3LEuqRzxF0tl0-loJmX-2_EJ9bmmBD1k",
-            authDomain: "dragoncon-schedule.firebaseapp.com",
-            databaseURL: "https://dragoncon-schedule-default-rtdb.firebaseio.com",
-            projectId: "dragoncon-schedule",
-            storageBucket: "dragoncon-schedule.appspot.com",
-            messagingSenderId: "679809817125",
-            appId: "1:679809817125:web:e31962c3f7cff12f9ee4a0"
-        };
-        
-        // Initialize Firebase and define db in global scope
-        let db;
-        try {
-            firebase.initializeApp(firebaseConfig);
-            db = firebase.database();
-        } catch (error) {
-            console.error("Firebase initialization error:", error);
-            alert("There was an error connecting to the database. Local mode only will be available.");
-        }
-        // Helper: get group key (for now, use a fixed key for all users)
-        const GROUP_KEY = 'default-group';
+        // Firebase and global variables have been initialized in the head section
+        // We now just need to reference them
         
         // Initialize default attendees
         function initializeAttendees() {
@@ -924,29 +938,31 @@
             };
             
             // For debugging
-            console.log("Saving data:", JSON.stringify(data));
+            console.log("Attempting to save data...");
             
-            // Save to Firebase if available
-            if (typeof db !== 'undefined' && db) {
+            // Always save to localStorage first as a backup
+            localStorage.setItem('dragoncon_schedule', JSON.stringify(data));
+            
+            // Try to save to Firebase if available
+            if (db) {
                 try {
-                    db.ref('schedules/' + GROUP_KEY).set(data, (err) => {
-                        if (err) {
-                            console.error("Save error:", err);
-                            alert('Error saving schedule: ' + err + '\n\nYour changes will only be saved locally in this browser session.');
-                        } else {
+                    console.log("Saving to Firebase...");
+                    db.ref('schedules/' + GROUP_KEY).set(data)
+                        .then(() => {
+                            console.log("Successfully saved to Firebase");
                             alert('Schedule saved! Everyone will see your changes.');
-                        }
-                    });
+                        })
+                        .catch((err) => {
+                            console.error("Firebase save error:", err);
+                            alert('Error saving to online database. Your changes have been saved locally in this browser only.');
+                        });
                 } catch (error) {
                     console.error("Firebase save error:", error);
-                    alert('Could not connect to database. Your changes will only be saved locally in this browser session.');
-                    // Save to localStorage as backup
-                    localStorage.setItem('dragoncon_schedule', JSON.stringify(data));
+                    alert('Could not connect to database. Your changes have been saved locally in this browser only.');
                 }
             } else {
-                // Save to localStorage if Firebase is not available
-                localStorage.setItem('dragoncon_schedule', JSON.stringify(data));
-                alert('Database not available. Your changes are saved locally in this browser only.');
+                console.log("Firebase not available, saved to localStorage only");
+                alert('Online database not available. Your changes have been saved locally in this browser only.');
             }
         }
         
@@ -1643,36 +1659,41 @@
         
         // Initialize on load
         window.onload = function() {
-            // Generate default schedule first in case Firebase fails
+            console.log("Window loaded, initializing schedule...");
+            // Generate default schedule first
             generateSchedule();
             initializeAttendees();
             updateAllEventBadges();
             
             // Try to load from Firebase if available
-            if (typeof db !== 'undefined' && db) {
+            if (db) {
+                console.log("Attempting to load data from Firebase...");
                 try {
-                    db.ref('schedules/' + GROUP_KEY).on('value', (snapshot) => {
-                        const data = snapshot.val();
-                        if (data) {
-                            attendees = data.attendees || [];
-                            eventData = data.eventData || {};
-                            document.getElementById('scheduleContainer').innerHTML = data.scheduleHTML || '';
-                            updateAttendeeList();
-                            updateAllEventBadges();
-                        }
-                    }, (error) => {
-                        console.error("Firebase error:", error);
-                        // Try to load from localStorage as a fallback
-                        loadFromLocalStorage();
-                    });
+                    db.ref('schedules/' + GROUP_KEY).once('value')
+                        .then((snapshot) => {
+                            const data = snapshot.val();
+                            if (data) {
+                                console.log("Firebase data loaded successfully");
+                                attendees = data.attendees || [];
+                                eventData = data.eventData || {};
+                                document.getElementById('scheduleContainer').innerHTML = data.scheduleHTML || '';
+                                updateAttendeeList();
+                                updateAllEventBadges();
+                            } else {
+                                console.log("No data found in Firebase, using default");
+                                loadFromLocalStorage();
+                            }
+                        })
+                        .catch((error) => {
+                            console.error("Firebase read error:", error);
+                            loadFromLocalStorage();
+                        });
                 } catch (error) {
                     console.error("Error accessing Firebase:", error);
-                    // Try to load from localStorage
                     loadFromLocalStorage();
                 }
             } else {
                 console.log("Firebase database not available. Using local mode only.");
-                // Try to load from localStorage
                 loadFromLocalStorage();
             }
         }
