@@ -586,9 +586,19 @@
     <script>
         // Restore default schedule manually
         function restoreDefaultSchedule() {
-            attendees = [];
-            eventData = {};
-            initializeAttendees();
+            // Set default attendees with unique IDs
+            attendees = [
+                { id: Date.now() + 1, name: 'Mark', colorId: 1 },
+                { id: Date.now() + 2, name: 'Holly', colorId: 2 },
+                { id: Date.now() + 3, name: 'Jessica', colorId: 3 }
+            ];
+            // Set default eventData with empty attendee lists
+            eventData = {
+                'thu-830pm-1': { attendees: [] },
+                'fri-1pm-1': { attendees: [] },
+                'fri-230pm-1': { attendees: [] },
+                'fri-230pm-2': { attendees: [] }
+            };
             const container = document.getElementById('scheduleContainer');
             container.innerHTML = `<div class=\"day-section\">\n                <h2>📅 Thursday, August 28</h2>\n                <div class=\"time-slot\">\n                    <div class=\"time-header\">8:30 PM</div>\n                    <div class=\"event cosplay\" data-event-id=\"thu-830pm-1\">\n                        <div class=\"event-title\" contenteditable=\"true\">Page to Stage Cosplay and Costume Contest</div>\n                        <div class=\"attendee-badges\"></div>\n                        <button class=\"delete-btn\" onclick=\"deleteEvent(this)\">Delete</button>\n                    </div>\n                    <button class=\"add-event-btn no-print\" onclick=\"addEvent(this)\">+ Add Event</button>\n                    <div class=\"time-slot-controls no-print\">\n                        <button class=\"delete-timeslot-btn\" onclick=\"deleteTimeSlot(this)\">🗑️ Delete Time Slot</button>\n                    </div>\n                </div>\n                <button class=\"add-timeslot-btn no-print\" onclick=\"addTimeSlot(this)\">+ Add Time Slot</button>\n            </div>\n            <div class=\"day-section\">\n                <h2>📅 Friday, August 29</h2>\n                <div class=\"time-slot\">\n                    <div class=\"time-header\">1:00 PM</div>\n                    <div class=\"event science-tech\" data-event-id=\"fri-1pm-1\">\n                        <div class=\"event-title\" contenteditable=\"true\">Building Your Own JARVIS: AI across Any Device</div>\n                        <div class=\"attendee-badges\"></div>\n                        <button class=\"delete-btn\" onclick=\"deleteEvent(this)\">Delete</button>\n                    </div>\n                    <button class=\"add-event-btn no-print\" onclick=\"addEvent(this)\">+ Add Event</button>\n                    <div class=\"time-slot-controls no-print\">\n                        <button class=\"delete-timeslot-btn\" onclick=\"deleteTimeSlot(this)\">🗑️ Delete Time Slot</button>\n                    </div>\n                </div>\n                <button class=\"add-timeslot-btn no-print\" onclick=\"addTimeSlot(this)\">+ Add Time Slot</button>\n                <div class=\"time-slot\">\n                    <div class=\"time-header\">2:30 PM <span class=\"overlap-warning\">⚠️ 2 OVERLAPPING</span></div>\n                    <div class=\"event apocalypse\" data-event-id=\"fri-230pm-1\">\n                        <div class=\"event-title\" contenteditable=\"true\">Apocalypse POV: How It Happened</div>\n                        <div class=\"attendee-badges\"></div>\n                        <button class=\"delete-btn\" onclick=\"deleteEvent(this)\">Delete</button>\n                    </div>\n                    <div class=\"event writing\" data-event-id=\"fri-230pm-2\">\n                        <div class=\"event-title\" contenteditable=\"true\">Military Sci-Fi Writers & Creators - Media Edition</div>\n                        <div class=\"attendee-badges\"></div>\n                        <button class=\"delete-btn\" onclick=\"deleteEvent(this)\">Delete</button>\n                    </div>\n                    <button class=\"add-event-btn no-print\" onclick=\"addEvent(this)\">+ Add Event</button>\n                    <div class=\"time-slot-controls no-print\">\n                        <button class=\"delete-timeslot-btn\" onclick=\"deleteTimeSlot(this)\">🗑️ Delete Time Slot</button>\n                    </div>\n                </div>\n                <button class=\"add-timeslot-btn no-print\" onclick=\"addTimeSlot(this)\">+ Add Time Slot</button>\n            </div>`;
             updateAttendeeList();
