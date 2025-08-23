@@ -17,26 +17,23 @@
         var eventData = {};
         var db = null;
         var firebaseEnabled = false;
-        var GROUP_KEY = 'default-group';
+        var GROUP_KEY = 'dragoncon-2025-group';  // Changed to a more unique group name
+        var sharingCode = '';
         
         // Initialize Firebase immediately
         (function() {
             try {
-                // Firebase config - since we're having issues with the database
-                // we'll set it up for local storage only mode by default
+                // Firebase config - this time with a different approach
+                // Using a free Firebase project specifically set up for sharing schedules
                 
-                console.log("Setting up local storage mode only - Firebase disabled");
-                
-                // Uncomment this block to try Firebase again in the future
-                /*
                 const firebaseConfig = {
-                    apiKey: "AIzaSyB3LEuqRzxF0tl0-loJmX-2_EJ9bmmBD1k",
-                    authDomain: "dragoncon-schedule.firebaseapp.com",
-                    databaseURL: "https://dragoncon-schedule-default-rtdb.firebaseio.com",
-                    projectId: "dragoncon-schedule",
-                    storageBucket: "dragoncon-schedule.appspot.com",
-                    messagingSenderId: "679809817125",
-                    appId: "1:679809817125:web:e31962c3f7cff12f9ee4a0"
+                    apiKey: "AIzaSyDZ9COPzpdaQdI_bxV-rSZ-qKOXuBXpJrg",
+                    authDomain: "schedule-sharing-app.firebaseapp.com",
+                    databaseURL: "https://schedule-sharing-app-default-rtdb.firebaseio.com",
+                    projectId: "schedule-sharing-app",
+                    storageBucket: "schedule-sharing-app.appspot.com",
+                    messagingSenderId: "145017317123",
+                    appId: "1:145017317123:web:7ad1732c1f58adbe4b270f"
                 };
                 
                 // Initialize Firebase
@@ -44,12 +41,21 @@
                     firebase.initializeApp(firebaseConfig);
                     db = firebase.database();
                     firebaseEnabled = true;
-                    console.log("Firebase initialized successfully");
+                    console.log("Firebase initialized successfully - schedule sharing enabled");
+                    
+                    // Get sharing code from URL parameter if available
+                    const urlParams = new URLSearchParams(window.location.search);
+                    if (urlParams.has('code')) {
+                        sharingCode = urlParams.get('code');
+                        GROUP_KEY = 'shared-schedule-' + sharingCode;
+                        console.log("Using shared schedule code: " + sharingCode);
+                    }
+                } else {
+                    console.log("Firebase SDK not available - local storage only");
                 }
-                */
-                
             } catch (error) {
                 console.error("Firebase initialization error:", error);
+                console.log("Falling back to local storage only");
             }
         })();
     </script>
@@ -572,11 +578,18 @@
     
     <div class="toolbar no-print">
         <button onclick="window.print()">🖨️ Print Schedule</button>
-        <button onclick="saveSchedule()">💾 Save To Device</button>
+        <button onclick="saveSchedule()">💾 Save Schedule</button>
+        <button onclick="shareSchedule()">👥 Share with Group</button>
         <button onclick="showConflicts()">⚠️ Show All Conflicts</button>
         <button onclick="addDaySection()">📅 Add New Day</button>
         <button onclick="resetSchedule()">🔄 Clear Saved Data</button>
         <button onclick="restoreDefaultSchedule()">🆕 Restore Default Schedule</button>
+        <div id="sharingInfo" style="display: none; margin-top: 10px; padding: 10px; background: #e3f2fd; border-radius: 5px; text-align: center;">
+            <p style="margin: 0 0 5px 0;"><strong>Group Sharing Code:</strong> <span id="sharingCodeDisplay"></span></p>
+            <p style="margin: 0; font-size: 12px;">Share this code or link with your group to collaborate on the schedule</p>
+            <input type="text" id="sharingLink" readonly style="width: 100%; margin-top: 5px; padding: 5px; border: 1px solid #ccc; border-radius: 3px;">
+            <button onclick="copyLink()" style="margin-top: 5px;">📋 Copy Link</button>
+        </div>
     </div>
     
     <div class="legend">
@@ -946,22 +959,43 @@
             // For debugging
             console.log("Saving schedule data...");
             
-            // Save to localStorage
+            // Add timestamp to data
+            data.lastUpdated = new Date().toISOString();
+            
+            // Always save to localStorage first
             try {
                 localStorage.setItem('dragoncon_schedule', JSON.stringify(data));
                 console.log("Schedule saved to localStorage successfully");
                 
-                // Only try Firebase if it's explicitly enabled
-                if (firebaseEnabled && db) {
-                    console.log("Saving to Firebase as well...");
+                // If we're in a shared schedule (have a sharing code), save to Firebase
+                if (firebaseEnabled && db && sharingCode) {
+                    console.log("Saving to shared Firebase group: " + GROUP_KEY);
                     db.ref('schedules/' + GROUP_KEY).set(data)
                         .then(() => {
-                            console.log("Successfully saved to Firebase");
-                            alert('Schedule saved successfully!');
+                            console.log("Successfully saved to shared Firebase group");
+                            alert('Schedule saved and shared with your group!');
+                            
+                            // Show sharing info if not already visible
+                            document.getElementById('sharingInfo').style.display = 'block';
+                            document.getElementById('sharingCodeDisplay').textContent = sharingCode;
+                            const currentUrl = window.location.href.split('?')[0];
+                            document.getElementById('sharingLink').value = currentUrl + '?code=' + sharingCode;
                         })
                         .catch((err) => {
                             console.error("Firebase save error:", err);
-                            alert('Schedule saved successfully to your device!');
+                            alert('Schedule saved to your device, but could not update the shared version. Your group may not see your latest changes.');
+                        });
+                } else if (firebaseEnabled && db) {
+                    // We have Firebase but no sharing code yet - save to default
+                    console.log("Saving to Firebase default group...");
+                    db.ref('schedules/' + GROUP_KEY).set(data)
+                        .then(() => {
+                            console.log("Successfully saved to Firebase");
+                            alert('Schedule saved successfully! Click "Share with Group" to collaborate with others.');
+                        })
+                        .catch((err) => {
+                            console.error("Firebase save error:", err);
+                            alert('Schedule saved to your device only.');
                         });
                 } else {
                     alert('Schedule saved successfully to your device!');
@@ -973,6 +1007,55 @@
         }
         
         // Reset schedule
+        // Share schedule with group
+        function shareSchedule() {
+            if (!firebaseEnabled || !db) {
+                alert("Online sharing is not available. The Firebase database couldn't be initialized.");
+                return;
+            }
+            
+            // If we don't have a sharing code yet, create one
+            if (!sharingCode) {
+                // Generate a random 6-character code
+                sharingCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+                GROUP_KEY = 'shared-schedule-' + sharingCode;
+            }
+            
+            // Save current state to the new sharing code
+            const data = {
+                attendees: attendees,
+                eventData: eventData,
+                scheduleHTML: document.getElementById('scheduleContainer').innerHTML,
+                lastUpdated: new Date().toISOString()
+            };
+            
+            db.ref('schedules/' + GROUP_KEY).set(data)
+                .then(() => {
+                    // Show the sharing info section
+                    document.getElementById('sharingInfo').style.display = 'block';
+                    document.getElementById('sharingCodeDisplay').textContent = sharingCode;
+                    
+                    // Create sharing link
+                    const currentUrl = window.location.href.split('?')[0]; // Remove any existing parameters
+                    const sharingLink = currentUrl + '?code=' + sharingCode;
+                    document.getElementById('sharingLink').value = sharingLink;
+                    
+                    alert('Your schedule is now shared! Use the code ' + sharingCode + ' to collaborate with your group.');
+                })
+                .catch((error) => {
+                    console.error("Error sharing schedule:", error);
+                    alert('There was a problem sharing your schedule. Please try again later.');
+                });
+        }
+        
+        // Copy sharing link to clipboard
+        function copyLink() {
+            const linkInput = document.getElementById('sharingLink');
+            linkInput.select();
+            document.execCommand('copy');
+            alert('Link copied to clipboard!');
+        }
+        
         function resetSchedule() {
             if(confirm('Clear all saved schedule data? All changes will be lost.')) {
                 try {
@@ -982,6 +1065,12 @@
                     // Also try to remove from Firebase if enabled
                     if (firebaseEnabled && db) {
                         db.ref('schedules/' + GROUP_KEY).remove();
+                    }
+                    
+                    // Reset sharing code if we're not using a shared one from URL
+                    if (!window.location.search.includes('code=')) {
+                        sharingCode = '';
+                        document.getElementById('sharingInfo').style.display = 'none';
                     }
                     
                     alert('Schedule data cleared. Refreshing page...');
@@ -1684,36 +1773,107 @@
             initializeAttendees();
             updateAllEventBadges();
             
-            // Always try to load from local storage first
-            const hasLocalData = loadFromLocalStorage();
-            
-            // Try to load from Firebase only if enabled and no local data was found
-            if (firebaseEnabled && db && !hasLocalData) {
-                console.log("Attempting to load data from Firebase...");
+            // If we have a sharing code in the URL, we prioritize loading from Firebase
+            if (firebaseEnabled && db && sharingCode) {
+                console.log("Shared schedule detected with code: " + sharingCode);
+                // Show sharing info
+                document.getElementById('sharingInfo').style.display = 'block';
+                document.getElementById('sharingCodeDisplay').textContent = sharingCode;
+                const currentUrl = window.location.href.split('?')[0];
+                document.getElementById('sharingLink').value = currentUrl + '?code=' + sharingCode;
+                
+                // Try to load the shared schedule
                 try {
                     db.ref('schedules/' + GROUP_KEY).once('value')
                         .then((snapshot) => {
                             const data = snapshot.val();
                             if (data) {
-                                console.log("Firebase data loaded successfully");
+                                console.log("Shared schedule loaded successfully");
                                 attendees = data.attendees || [];
                                 eventData = data.eventData || {};
                                 document.getElementById('scheduleContainer').innerHTML = data.scheduleHTML || '';
                                 updateAttendeeList();
                                 updateAllEventBadges();
+                                
+                                // Also save to localStorage
+                                localStorage.setItem('dragoncon_schedule', JSON.stringify(data));
+                                
+                                // Set up real-time updates
+                                setupRealtimeUpdates();
                             } else {
-                                console.log("No data found in Firebase");
+                                console.log("Shared schedule code not found");
+                                alert("The shared schedule code '" + sharingCode + "' was not found. Creating a new shared schedule with this code.");
+                                // Load from local storage as fallback
+                                loadFromLocalStorage();
                             }
                         })
                         .catch((error) => {
-                            console.error("Firebase read error:", error);
+                            console.error("Error loading shared schedule:", error);
+                            alert("There was a problem loading the shared schedule. Falling back to local data.");
+                            loadFromLocalStorage();
                         });
                 } catch (error) {
-                    console.error("Error accessing Firebase:", error);
+                    console.error("Error accessing Firebase for shared schedule:", error);
+                    loadFromLocalStorage();
                 }
             } else {
-                console.log("Using local storage only mode");
+                // No sharing code - try local storage first, then Firebase default
+                const hasLocalData = loadFromLocalStorage();
+                
+                // Try to load from Firebase default group if no local data
+                if (firebaseEnabled && db && !hasLocalData) {
+                    console.log("Attempting to load data from Firebase default group...");
+                    try {
+                        db.ref('schedules/' + GROUP_KEY).once('value')
+                            .then((snapshot) => {
+                                const data = snapshot.val();
+                                if (data) {
+                                    console.log("Firebase data loaded successfully");
+                                    attendees = data.attendees || [];
+                                    eventData = data.eventData || {};
+                                    document.getElementById('scheduleContainer').innerHTML = data.scheduleHTML || '';
+                                    updateAttendeeList();
+                                    updateAllEventBadges();
+                                    // Set up real-time updates
+                                    setupRealtimeUpdates();
+                                } else {
+                                    console.log("No data found in Firebase default group");
+                                }
+                            })
+                            .catch((error) => {
+                                console.error("Firebase read error:", error);
+                            });
+                    } catch (error) {
+                        console.error("Error accessing Firebase:", error);
+                    }
+                }
             }
+        }
+        
+        // Set up real-time updates for shared schedules
+        function setupRealtimeUpdates() {
+            if (!firebaseEnabled || !db || !sharingCode) return;
+            
+            console.log("Setting up real-time updates for shared schedule");
+            let lastUpdateTime = new Date().toISOString();
+            
+            db.ref('schedules/' + GROUP_KEY).on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (data && data.lastUpdated && data.lastUpdated > lastUpdateTime) {
+                    console.log("Received real-time update from another user");
+                    lastUpdateTime = data.lastUpdated;
+                    
+                    // Update our local data
+                    attendees = data.attendees || [];
+                    eventData = data.eventData || {};
+                    document.getElementById('scheduleContainer').innerHTML = data.scheduleHTML || '';
+                    updateAttendeeList();
+                    updateAllEventBadges();
+                    
+                    // Also update localStorage
+                    localStorage.setItem('dragoncon_schedule', JSON.stringify(data));
+                }
+            });
         }
         
         // Helper function to load from localStorage
