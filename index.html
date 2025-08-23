@@ -16,12 +16,19 @@
         var attendees = [];
         var eventData = {};
         var db = null;
+        var firebaseEnabled = false;
         var GROUP_KEY = 'default-group';
         
         // Initialize Firebase immediately
         (function() {
             try {
-                // Firebase config
+                // Firebase config - since we're having issues with the database
+                // we'll set it up for local storage only mode by default
+                
+                console.log("Setting up local storage mode only - Firebase disabled");
+                
+                // Uncomment this block to try Firebase again in the future
+                /*
                 const firebaseConfig = {
                     apiKey: "AIzaSyB3LEuqRzxF0tl0-loJmX-2_EJ9bmmBD1k",
                     authDomain: "dragoncon-schedule.firebaseapp.com",
@@ -36,10 +43,11 @@
                 if (typeof firebase !== 'undefined') {
                     firebase.initializeApp(firebaseConfig);
                     db = firebase.database();
+                    firebaseEnabled = true;
                     console.log("Firebase initialized successfully");
-                } else {
-                    console.error("Firebase SDK not available");
                 }
+                */
+                
             } catch (error) {
                 console.error("Firebase initialization error:", error);
             }
@@ -564,11 +572,11 @@
     
     <div class="toolbar no-print">
         <button onclick="window.print()">🖨️ Print Schedule</button>
-        <button onclick="saveSchedule()">💾 Save Changes</button>
+        <button onclick="saveSchedule()">💾 Save To Device</button>
         <button onclick="showConflicts()">⚠️ Show All Conflicts</button>
         <button onclick="addDaySection()">📅 Add New Day</button>
-        <button onclick="resetSchedule()">🔄 Reset Original</button>
-    <button onclick="restoreDefaultSchedule()">🆕 Restore Default Schedule</button>
+        <button onclick="resetSchedule()">🔄 Clear Saved Data</button>
+        <button onclick="restoreDefaultSchedule()">🆕 Restore Default Schedule</button>
     </div>
     
     <div class="legend">
@@ -649,29 +657,27 @@
                 scheduleHTML: document.getElementById('scheduleContainer').innerHTML
             };
             
-            // Save to Firebase if available, otherwise to localStorage
-            if (typeof db !== 'undefined' && db) {
-                try {
-                    db.ref('schedules/' + GROUP_KEY).set(defaultData, (error) => {
-                        if (error) {
-                            console.error("Error restoring default schedule:", error);
-                            alert("Error saving to database. Default schedule has been restored locally.");
-                            // Save to localStorage as backup
-                            localStorage.setItem('dragoncon_schedule', JSON.stringify(defaultData));
-                        } else {
-                            alert("Default schedule restored!");
-                        }
-                    });
-                } catch (error) {
-                    console.error("Firebase error when restoring default:", error);
-                    // Save to localStorage if Firebase errors out
-                    localStorage.setItem('dragoncon_schedule', JSON.stringify(defaultData));
-                    alert("Default schedule restored locally (database connection failed).");
-                }
-            } else {
-                // Save to localStorage if Firebase is not available
+            try {
+                // Always save to localStorage
                 localStorage.setItem('dragoncon_schedule', JSON.stringify(defaultData));
-                alert("Default schedule restored locally (database not available).");
+                
+                // Only try Firebase if it's explicitly enabled
+                if (firebaseEnabled && db) {
+                    db.ref('schedules/' + GROUP_KEY).set(defaultData)
+                        .then(() => {
+                            console.log("Default schedule saved to Firebase");
+                            alert("Default schedule restored!");
+                        })
+                        .catch((error) => {
+                            console.error("Error saving default schedule to Firebase:", error);
+                            alert("Default schedule restored to your device!");
+                        });
+                } else {
+                    alert("Default schedule restored!");
+                }
+            } catch (error) {
+                console.error("Error restoring default schedule:", error);
+                alert("There was a problem restoring the default schedule. Please try again.");
             }
         }
         // Store attendees
@@ -938,40 +944,52 @@
             };
             
             // For debugging
-            console.log("Attempting to save data...");
+            console.log("Saving schedule data...");
             
-            // Always save to localStorage first as a backup
-            localStorage.setItem('dragoncon_schedule', JSON.stringify(data));
-            
-            // Try to save to Firebase if available
-            if (db) {
-                try {
-                    console.log("Saving to Firebase...");
+            // Save to localStorage
+            try {
+                localStorage.setItem('dragoncon_schedule', JSON.stringify(data));
+                console.log("Schedule saved to localStorage successfully");
+                
+                // Only try Firebase if it's explicitly enabled
+                if (firebaseEnabled && db) {
+                    console.log("Saving to Firebase as well...");
                     db.ref('schedules/' + GROUP_KEY).set(data)
                         .then(() => {
                             console.log("Successfully saved to Firebase");
-                            alert('Schedule saved! Everyone will see your changes.');
+                            alert('Schedule saved successfully!');
                         })
                         .catch((err) => {
                             console.error("Firebase save error:", err);
-                            alert('Error saving to online database. Your changes have been saved locally in this browser only.');
+                            alert('Schedule saved successfully to your device!');
                         });
-                } catch (error) {
-                    console.error("Firebase save error:", error);
-                    alert('Could not connect to database. Your changes have been saved locally in this browser only.');
+                } else {
+                    alert('Schedule saved successfully to your device!');
                 }
-            } else {
-                console.log("Firebase not available, saved to localStorage only");
-                alert('Online database not available. Your changes have been saved locally in this browser only.');
+            } catch (error) {
+                console.error("Error saving to localStorage:", error);
+                alert('There was an error saving your schedule. Please try again.');
             }
         }
         
         // Reset schedule
         function resetSchedule() {
-            if(confirm('Reset to original schedule? All changes will be lost.')) {
-                db.ref('schedules/' + GROUP_KEY).remove(() => {
+            if(confirm('Clear all saved schedule data? All changes will be lost.')) {
+                try {
+                    // Remove from localStorage
+                    localStorage.removeItem('dragoncon_schedule');
+                    
+                    // Also try to remove from Firebase if enabled
+                    if (firebaseEnabled && db) {
+                        db.ref('schedules/' + GROUP_KEY).remove();
+                    }
+                    
+                    alert('Schedule data cleared. Refreshing page...');
                     location.reload();
-                });
+                } catch (error) {
+                    console.error("Error clearing schedule data:", error);
+                    alert("There was a problem clearing your data. Please try again.");
+                }
             }
         }
         
@@ -1660,13 +1678,17 @@
         // Initialize on load
         window.onload = function() {
             console.log("Window loaded, initializing schedule...");
+            
             // Generate default schedule first
             generateSchedule();
             initializeAttendees();
             updateAllEventBadges();
             
-            // Try to load from Firebase if available
-            if (db) {
+            // Always try to load from local storage first
+            const hasLocalData = loadFromLocalStorage();
+            
+            // Try to load from Firebase only if enabled and no local data was found
+            if (firebaseEnabled && db && !hasLocalData) {
                 console.log("Attempting to load data from Firebase...");
                 try {
                     db.ref('schedules/' + GROUP_KEY).once('value')
@@ -1680,25 +1702,22 @@
                                 updateAttendeeList();
                                 updateAllEventBadges();
                             } else {
-                                console.log("No data found in Firebase, using default");
-                                loadFromLocalStorage();
+                                console.log("No data found in Firebase");
                             }
                         })
                         .catch((error) => {
                             console.error("Firebase read error:", error);
-                            loadFromLocalStorage();
                         });
                 } catch (error) {
                     console.error("Error accessing Firebase:", error);
-                    loadFromLocalStorage();
                 }
             } else {
-                console.log("Firebase database not available. Using local mode only.");
-                loadFromLocalStorage();
+                console.log("Using local storage only mode");
             }
         }
         
         // Helper function to load from localStorage
+        // Returns true if data was successfully loaded, false otherwise
         function loadFromLocalStorage() {
             const savedData = localStorage.getItem('dragoncon_schedule');
             if (savedData) {
@@ -1710,10 +1729,13 @@
                     updateAttendeeList();
                     updateAllEventBadges();
                     console.log("Loaded schedule from localStorage");
+                    return true;
                 } catch (e) {
                     console.error("Error parsing localStorage data:", e);
+                    return false;
                 }
             }
+            return false;
         }
     </script>
 </body>
