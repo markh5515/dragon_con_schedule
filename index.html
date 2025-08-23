@@ -847,7 +847,30 @@
         
         // Save schedule
         function saveSchedule() {
-            // Always get the latest HTML and attendee/event data before saving
+            // Rebuild attendees from DOM
+            attendees = [];
+            document.querySelectorAll('#attendeeList .attendee-chip').forEach(chip => {
+                const name = chip.childNodes[0].textContent.trim();
+                const colorClass = Array.from(chip.classList).find(c => c.startsWith('attendee-'));
+                const colorId = colorClass ? colorClass.replace('attendee-', '') : 1;
+                attendees.push({ name, colorId });
+            });
+
+            // Rebuild eventData from DOM
+            eventData = {};
+            document.querySelectorAll('.event').forEach(eventEl => {
+                const eventId = eventEl.dataset.eventId;
+                const activeAttendees = [];
+                eventEl.querySelectorAll('.attendee-badge.active').forEach(badge => {
+                    const name = badge.textContent.trim();
+                    // Find colorId from class
+                    const colorClass = Array.from(badge.classList).find(c => c.startsWith('attendee-'));
+                    const colorId = colorClass ? colorClass.replace('attendee-', '') : 1;
+                    activeAttendees.push({ name, colorId });
+                });
+                eventData[eventId] = { attendees: activeAttendees };
+            });
+
             const data = {
                 attendees: attendees,
                 eventData: eventData,
@@ -858,6 +881,7 @@
                     alert('Error saving schedule: ' + err);
                 } else {
                     alert('Schedule saved! Everyone will see your changes.');
+                    location.reload();
                 }
             });
         }
