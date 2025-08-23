@@ -847,6 +847,7 @@
         
         // Save schedule
         function saveSchedule() {
+            // Always get the latest HTML and attendee/event data before saving
             const data = {
                 attendees: attendees,
                 eventData: eventData,
