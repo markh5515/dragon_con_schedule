@@ -1545,9 +1545,17 @@
                     updateAttendeeList();
                     updateAllEventBadges();
                 } else {
+                    // If no data, generate and save default schedule to Firebase
                     initializeAttendees();
                     generateSchedule();
                     updateAllEventBadges();
+                    // Save default schedule to Firebase
+                    const defaultData = {
+                        attendees: attendees,
+                        eventData: eventData,
+                        scheduleHTML: document.getElementById('scheduleContainer').innerHTML
+                    };
+                    db.ref('schedules/' + GROUP_KEY).set(defaultData);
                 }
             });
         }
